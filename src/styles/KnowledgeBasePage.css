@@ -1,0 +1,1522 @@
+/* 知识库页面整体布局 */
+.knowledge-base-page {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 左侧侧边栏 */
+.sidebar {
+  width: 280px;
+  background-color: #f9f9f9;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
+/* 折叠状态下的侧边栏 */
+.sidebar.collapsed {
+  width: 80px;
+}
+
+/* 折叠状态下的侧边栏内容 */
+.sidebar-collapsed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+  height: 100%;
+  justify-content: flex-start;
+}
+
+/* 折叠状态下的logo */
+.sidebar-logo-collapsed {
+  margin-bottom: 30px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.sidebar-logo-collapsed .raven-icon-small {
+  width: 50px;
+  height: 50px;
+}
+
+.sidebar-logo-collapsed:hover {
+  opacity: 0.8;
+}
+
+/* 折叠按钮 */
+.collapse-btn {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.collapse-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #333;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 展开状态下的折叠按钮 */
+.collapse-btn.expand {
+  position: relative;
+  top: auto;
+  right: auto;
+  transform: translateY(0);
+  margin-top: 20px;
+  margin-bottom: 20px;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  background-color: #f9f9f9;
+  border-color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.collapse-btn.expand:hover {
+  background-color: #f8f9fa;
+  border-color: #333;
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 折叠按钮图标样式 */
+.collapse-btn svg {
+  transition: all 0.3s ease;
+}
+
+.collapse-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* 旋转180度的动画 */
+.rotate-180 {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+/* 折叠状态下隐藏不需要的元素 */
+.sidebar.collapsed .sidebar-header,
+.sidebar.collapsed .conversations-list {
+  display: none;
+}
+
+/* 展开状态下隐藏折叠状态的元素 */
+.sidebar:not(.collapsed) .sidebar-collapsed {
+  display: none;
+}
+
+/* 侧边栏头部 */
+.sidebar-header {
+  padding: 20px 10px 20px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sidebar-logo:hover {
+  opacity: 0.8;
+}
+
+.raven-icon-small {
+  width: 40px;
+  height: 40px;
+  background-image: url('/curvus.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.raven-icon-large {
+  width: 50px;
+  height: 50px;
+  background-image: url('/curvus.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.sidebar-logo h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+/* 确保页面头部标题没有默认边距 */
+.knowledge-base-page .page-title {
+  margin: 0;
+}
+
+/* 会话列表 */
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+/* 知识库部分 */
+.knowledge-base-section {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+}
+
+/* 知识库部分头部 */
+.knowledge-base-section .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0;
+}
+
+.knowledge-base-section .section-header:hover {
+  background-color: #f5f5f5;
+}
+
+.knowledge-base-section .section-header.active {
+  background-color: #333;
+  color: white;
+}
+
+.knowledge-base-section .section-header.active .section-title {
+  color: white;
+}
+
+.knowledge-base-section .section-header.active .section-toggle {
+  color: white;
+}
+
+/* 知识库部分标题 */
+.knowledge-base-section .section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 知识库部分切换按钮 */
+.knowledge-base-section .section-toggle {
+  font-size: 12px;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+/* 知识库部分内容 */
+.knowledge-base-section .section-content {
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 子部分 */
+.sub-section {
+  margin-left: 20px;
+  border-left: 2px solid #e0e0e0;
+  padding-left: 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* 子部分头部 */
+.sub-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.sub-section-header:hover {
+  color: #333;
+}
+
+/* 子部分标题 */
+.sub-section-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+/* 子部分切换按钮 */
+.sub-section-toggle {
+  font-size: 10px;
+  color: #999;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+/* 创建知识库小按钮 */
+.create-kb-btn-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #333;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.create-kb-btn-small:hover {
+  background-color: #555;
+  transform: scale(1.1);
+}
+
+/* 子部分内容 */
+.sub-section-content {
+  padding: 10px 0;
+}
+
+/* 知识库项 */
+.knowledge-base-item {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.knowledge-base-item:hover {
+  background-color: #f0f0f0;
+  border-color: #333;
+}
+
+.knowledge-base-item.active {
+  background-color: #333;
+  color: white;
+  border-color: #333;
+}
+
+.knowledge-base-item.active .knowledge-base-name {
+  color: white;
+}
+
+/* 知识库名称 */
+.knowledge-base-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 知识库大小 */
+.knowledge-base-size {
+  font-size: 12px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+
+/* 主内容区 */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #ffffff;
+  max-width: 100%;
+  padding: 0;
+}
+
+/* 页面头部 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 页面操作按钮 */
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #333;
+}
+
+.action-icon {
+  font-size: 16px;
+}
+
+/* 上传文件按钮 */
+.upload-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 用户信息 */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.user-avatar:hover {
+  border: 2px solid #333;
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.logout-btn {
+  padding: 6px 12px;
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #333;
+}
+
+/* 文件夹结构 */
+.folder-structure {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  background-color: #fafafa;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 面包屑导航 */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 0;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.breadcrumb-item {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.breadcrumb-item:hover {
+  color: #333;
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #999;
+}
+
+/* 文件夹部分 */
+.folder-section {
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 区域头部 */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+  width: 100%;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-title-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0;
+  padding-left: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 区域操作按钮 */
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.section-actions .action-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  min-width: 120px;
+  justify-content: center;
+}
+
+/* 空文件夹提示 */
+.empty-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #999;
+  background-color: #f9f9f9;
+  border: 1px dashed #e0e0e0;
+  border-radius: 8px;
+  grid-column: 1 / -1;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-text {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.empty-hint {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 文档查看模态框 */
+.document-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.document-modal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.document-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fafafa;
+}
+
+.document-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+
+.document-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.download-btn {
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.download-btn:hover {
+  background-color: #555;
+}
+
+.close-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.document-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.document-content {
+  max-width: 100%;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #666;
+  font-size: 16px;
+}
+
+/* PDF预览容器 */
+.pdf-preview-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.pdf-preview {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fafafa;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.pdf-iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Word预览容器 */
+.word-preview-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.word-preview-container .document-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.word-preview-container .document-content h1,
+.word-preview-container .document-content h2,
+.word-preview-container .document-content h3,
+.word-preview-container .document-content h4,
+.word-preview-container .document-content h5,
+.word-preview-container .document-content h6 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.word-preview-container .document-content p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.word-preview-container .document-content ul,
+.word-preview-container .document-content ol {
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+
+.word-preview-container .document-content li {
+  margin-bottom: 5px;
+}
+
+.word-preview-container .document-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+}
+
+.word-preview-container .document-content th,
+.word-preview-container .document-content td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.word-preview-container .document-content th {
+  background-color: #f5f5f5;
+}
+
+.word-preview-container .document-content img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 15px;
+}
+
+/* 文件错误提示 */
+.file-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  color: #666;
+  font-size: 16px;
+}
+
+.file-error p {
+  margin: 0;
+  text-align: center;
+  padding: 0 20px;
+}
+
+/* 文件信息区域 */
+.file-info {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.file-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 文件操作区域 */
+.file-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn.primary {
+  background-color: #333;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background-color: #555;
+}
+
+.action-btn.secondary {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #e0e0e0;
+}
+
+.action-btn.secondary:hover {
+  background-color: #e0e0e0;
+}
+
+/* 项目菜单 */
+.item-menu {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.menu-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 50%;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.folder-item {
+  position: relative;
+  padding-right: 50px; /* 为右上角菜单预留空间 */
+}
+
+.folder-item:hover .menu-btn {
+  opacity: 1;
+}
+
+.menu-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/* 上下文菜单 */
+.context-menu {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 120px;
+  overflow: hidden;
+}
+
+.context-menu-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.context-menu-item.delete {
+  color: #c62828;
+}
+
+.context-menu-item.delete:hover {
+  background-color: #ffebee;
+}
+
+.document-h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 24px 0 16px 0;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 12px;
+}
+
+.document-h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 20px 0 12px 0;
+  color: #333;
+}
+
+.document-h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  color: #333;
+}
+
+.document-paragraph {
+  margin: 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.document-list-item {
+  margin: 8px 0 8px 24px;
+  font-size: 16px;
+  color: #333;
+}
+
+.document-content br {
+  margin: 8px 0;
+}
+
+/* 文件夹项目列表 */
+.folder-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  max-width: 100%;
+}
+
+/* 文件夹项目 */
+.folder-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.folder-item:hover {
+  background-color: #f5f5f5;
+  border-color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.folder-item.selected {
+  background-color: #e8f5e8;
+  border-color: #4caf50;
+}
+
+/* 添加文件夹项 */
+.add-folder {
+  color: #666;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-folder:hover {
+  color: #333;
+}
+
+/* 文件夹图标 */
+.folder-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+/* 文件夹名称 */
+.folder-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  word-break: break-word;
+  width: 100%;
+}
+
+/* 文件夹计数和文件大小 */
+.folder-count, .file-size {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 文件项特殊样式 */
+.folder-item.file {
+  align-items: flex-start;
+}
+
+/* 文件夹项特殊样式 */
+.folder-item.folder {
+  align-items: flex-start;
+}
+
+/* 适应不同类型的文件图标 */
+.folder-icon.pdf {
+  color: #ff0000;
+}
+
+.folder-icon.word {
+  color: #1a73e8;
+}
+
+/* 基于知识库提问 */
+.knowledge-base-question {
+  padding: 20px 30px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* 输入容器 */
+.input-container {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 30px;
+  padding: 15px 20px;
+  gap: 15px;
+}
+
+/* 提问输入框 */
+.question-input {
+  flex: 1;
+  font-size: 16px;
+  padding: 10px 0;
+  color: #333;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.question-input::placeholder {
+  color: #999;
+}
+
+/* 发送按钮 */
+.send-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 16px;
+}
+
+.send-button:hover {
+  background-color: #555;
+}
+
+.send-icon {
+  transform: translateX(1px);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .page-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .folder-structure {
+    padding: 20px;
+  }
+  
+  .knowledge-base-question {
+    padding: 15px 20px;
+  }
+  
+  .page-header {
+    padding: 15px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+/* 滚动条样式 */
+.folder-structure::-webkit-scrollbar {
+  width: 8px;
+}
+
+.folder-structure::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.folder-structure::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.folder-structure::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 共享知识库详情样式 */
+.shared-knowledge-base-detail {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  background-color: #fafafa;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 知识库头部 */
+.knowledge-base-header {
+  display: flex;
+  gap: 30px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.knowledge-base-info {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.knowledge-base-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.knowledge-base-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.knowledge-base-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.knowledge-base-meta h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.knowledge-base-description {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.knowledge-base-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.knowledge-base-stats span {
+  font-size: 12px;
+  color: #999;
+  display: flex;
+  align-items: center;
+}
+
+.knowledge-base-cover {
+  width: 200px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.knowledge-base-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 知识库内容 */
+.knowledge-base-content {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.knowledge-base-content h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.content-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.content-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.content-item:hover {
+  background-color: #f5f5f5;
+  border-color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-item.file {
+  align-items: flex-start;
+}
+
+.file-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  word-break: break-word;
+  width: 100%;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 空内容提示 */
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #999;
+  background-color: #f9f9f9;
+  border: 1px dashed #e0e0e0;
+  border-radius: 8px;
+  grid-column: 1 / -1;
+}
+
+/* 菜单按钮样式 */
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.menu-btn:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 下拉菜单样式 */
+.context-menu {
+  position: fixed;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 150px;
+  padding: 8px 0;
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.context-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.context-menu-item svg {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.menu-text {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 选中的文件详情 */
+.selected-file-detail {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin-top: 30px;
+}
+
+.selected-file-detail h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.selected-file-detail .file-info {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.selected-file-detail .file-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.selected-file-detail .file-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .knowledge-base-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .knowledge-base-cover {
+    width: 100%;
+    max-width: 300px;
+    height: 150px;
+  }
+  
+  .content-items {
+    grid-template-columns: 1fr;
+  }
+  
+  .shared-knowledge-base-detail {
+    padding: 20px;
+  }
+  
+  .knowledge-base-content {
+    padding: 20px;
+  }
+  
+  .selected-file-detail {
+    padding: 20px;
+  }
+}

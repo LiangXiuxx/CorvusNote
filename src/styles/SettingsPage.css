@@ -1,0 +1,285 @@
+/* 设置页面样式 */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+/* 设置头部 */
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #ffffff;
+}
+
+.back-btn {
+  padding: 8px 16px;
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #333;
+}
+
+.settings-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* 设置内容 */
+.settings-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* 设置表单 */
+.settings-form {
+  width: 100%;
+  max-width: 600px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+}
+
+.settings-form h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* 表单部分 */
+.form-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.form-section h4 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* 头像容器 */
+.avatar-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.current-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+}
+
+.avatar-actions {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 表单组 */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.1);
+}
+
+/* 按钮样式 */
+.primary-btn, .secondary-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.primary-btn {
+  background-color: #333;
+  color: white;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background-color: #555;
+}
+
+.primary-btn:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.secondary-btn {
+  background-color: white;
+  color: #333;
+  border: 1px solid #e0e0e0;
+}
+
+.secondary-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #333;
+}
+
+/* 表单操作区 */
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+/* 消息提示 */
+.error-message, .success-message {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.success-message {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+/* 注销账户样式 */
+.delete-account-section {
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 2px solid #f0f0f0;
+  background-color: #fafafa;
+  padding: 30px;
+  border-radius: 8px;
+  margin-top: 40px;
+}
+
+.delete-account-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #c62828;
+  margin-bottom: 15px;
+}
+
+.delete-account-warning {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #fff3f3;
+  border-left: 4px solid #ffcdd2;
+  border-radius: 4px;
+}
+
+.danger-btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  background-color: #c62828;
+  color: white;
+  width: 100%;
+  max-width: 200px;
+}
+
+.danger-btn:hover {
+  background-color: #b71c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(198, 40, 40, 0.3);
+}
+
+.danger-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(198, 40, 40, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .settings-content {
+    padding: 10px;
+  }
+  
+  .settings-form {
+    padding: 20px;
+  }
+  
+  .avatar-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .current-avatar {
+    margin-bottom: 15px;
+  }
+  
+  .delete-account-section {
+    padding: 20px;
+  }
+  
+  .danger-btn {
+    max-width: 100%;
+  }
+}

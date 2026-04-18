@@ -1,0 +1,733 @@
+.home-page {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+/* 侧边栏 */
+.side-bar {
+  width: 70px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  border-right: 1px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.logo {
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.raven-icon {
+  width: 50px;
+  height: 50px;
+  background-image: url('/curvus.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+}
+
+.nav-item {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav-item:hover {
+  background-color: #f5f5f5;
+}
+
+.nav-icon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 设置部分 */
+.settings-section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+.settings-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 10px;
+}
+
+.settings-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.settings-menu {
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  min-width: 180px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.settings-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.settings-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.settings-menu-item .icon {
+  flex-shrink: 0;
+}
+
+.settings-menu-item span {
+  color: #333;
+}
+
+/* 主内容区 */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.app-info {
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+.app-name {
+  font-size: 48px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+/* 问题表单 */
+.question-form {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 60px;
+}
+
+.input-container {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 30px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: border-color 0.2s;
+}
+
+.input-container.focused {
+  border: 2px solid #000000;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.question-input {
+  flex: 1;
+  font-size: 18px;
+  padding: 10px 0;
+  color: #333;
+}
+
+.question-input::placeholder {
+  color: #999;
+}
+
+.send-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 10px;
+}
+
+.send-button:hover {
+  background-color: #555;
+}
+
+.send-icon {
+  font-size: 16px;
+  transform: translateX(1px);
+}
+
+/* 停止按钮样式 */
+.stop-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-left: 10px;
+  border: none;
+}
+
+.stop-button:hover {
+  background-color: #555;
+}
+
+.stop-button:active {
+  transform: scale(0.95);
+}
+
+.stop-icon {
+  width: 14px;
+  height: 14px;
+  background-color: #fff;
+  border-radius: 2px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* 附件上传按钮样式 */
+.attach-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: #666;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 18px;
+}
+
+.attach-button:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/* 已选择文件名样式 */
+.selected-file-name {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  margin: 0 10px;
+  border: 1px solid #c8e6c9;
+}
+
+.options-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  color: #666;
+  font-size: 14px;
+}
+
+.mode-select,
+.model-select {
+  padding: 5px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.model-select:hover {
+  border-color: #333;
+  background-color: #f5f5f5;
+}
+
+.model-info, .user-info {
+  display: flex;
+  align-items: center;
+}
+
+/* 快捷工具 */
+.quick-tools {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.tool-item:hover {
+  transform: translateY(-5px);
+}
+
+.tool-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.tool-label {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 用户操作区 */
+.user-actions {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 挂载的知识库样式 */
+.mounted-knowledge-bases {
+  width: 100%;
+  max-width: 800px;
+  padding: 10px 20px;
+  background-color: #f0f9ff;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+  border-radius: 20px;
+}
+
+.mounted-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mounted-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mounted-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  border: 1px solid #bbdefb;
+  transition: all 0.2s;
+}
+
+.mounted-file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.unmount-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.unmount-btn:hover {
+  background-color: #1565c0;
+  transform: scale(1.1);
+}
+
+/* 带有@符号按钮的输入框 */
+.input-with-at {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 10px;
+  background-color: transparent;
+}
+
+.at-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.at-button:hover {
+  background-color: #e0e0e0;
+  border-color: #333;
+  transform: scale(1.1);
+}
+
+.at-button:active {
+  transform: scale(0.95);
+}
+
+/* 知识库选择器 */
+.knowledge-base-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 20px;
+  right: 20px;
+  max-height: 300px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.picker-header {
+  padding: 15px 20px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.picker-content {
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+.knowledge-base-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.knowledge-base-item:hover {
+  background-color: #f5f5f5;
+}
+
+.knowledge-base-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.knowledge-base-name {
+  flex: 1;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knowledge-base-size {
+  font-size: 12px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.no-knowledge-base {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #999;
+  gap: 10px;
+}
+
+.no-knowledge-base-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.no-knowledge-base-text {
+  font-size: 14px;
+  text-align: center;
+}
+
+/* 调整输入容器的相对定位，以便知识库选择器能正确定位 */
+.input-container {
+  position: relative;
+}
+
+/* 调整输入包装器的样式 */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 10px;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* 调整输入操作区的布局，将所有按钮放在同一行 */
+.input-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+  background-color: transparent;
+}
+
+/* 左侧操作区：模式选择和模型选择 */
+.left-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 中间操作区：显示已选择的文件名 */
+.middle-actions {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 右侧操作区：功能按钮 */
+.right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 调整问题输入框的样式 */
+.question-input {
+  width: 100%;
+  font-size: 18px;
+  padding: 10px 0;
+  color: #333;
+  border: none;
+  background-color: transparent;
+  outline: none;
+}
+
+/* 调整选项栏样式 */
+.options-bar {
+  display: none;
+}
+
+/* 用户信息 */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.user-avatar:hover {
+  border-color: #333;
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* ── 深度思考切换按钮（与 ChatPage 共享样式） */
+.thinking-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  border: 1.5px solid #d0d0d0;
+  background: #f7f7f7;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  line-height: 1;
+  height: 28px;
+}
+
+.thinking-toggle-btn:hover:not(:disabled) {
+  border-color: #888;
+  color: #333;
+  background: #efefef;
+}
+
+.thinking-toggle-btn.active {
+  border-color: #6c63ff;
+  background: #ede8ff;
+  color: #6c63ff;
+  font-weight: 500;
+}
+
+.thinking-toggle-btn.active:hover {
+  border-color: #5548d9;
+  background: #e0d8ff;
+  color: #5548d9;
+}
+
+.thinking-toggle-btn.disabled,
+.thinking-toggle-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.logout-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #333;
+}

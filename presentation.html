@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CorvusNote - 智能对话平台毕业设计答辩</title>
+    <style>
+        :root {
+            --primary: #0071e3;
+            --secondary: #f5f5f7;
+            --text: #1d1d1f;
+            --text-light: #86868b;
+            --background: #ffffff;
+            --accent: #0071e3;
+            --card-bg: #f5f5f7;
+            --border: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 10vw;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .slide h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .slide h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .slide h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .slide p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--text);
+            max-width: 800px;
+        }
+
+        .slide .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .slide .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 900px;
+        }
+
+        .slide .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .slide .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .slide .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .slide .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .slide .feature-card p {
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .slide .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .slide .tech-item {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .slide .architecture {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .slide .architecture img {
+            width: 100%;
+            height: auto;
+        }
+
+        .slide .workflow {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem 0;
+        }
+
+        .slide .workflow-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .slide .workflow-step .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            margin-right: 1.5rem;
+        }
+
+        .slide .workflow-step .step-content {
+            flex: 1;
+        }
+
+        .slide .workflow-step h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .slide .workflow-step p {
+            font-size: 1rem;
+            text-align: left;
+            margin-bottom: 0;
+        }
+
+        .slide .comparison {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem 0;
+        }
+
+        .slide .comparison table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .slide .comparison th, .slide .comparison td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .slide .comparison th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+
+        .slide .comparison tr:hover {
+            background-color: var(--secondary);
+        }
+
+        .slide .demo {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .slide .demo img {
+            width: 100%;
+            height: auto;
+        }
+
+        .slide .conclusion {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .slide .conclusion p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+        }
+
+        .slide .conclusion .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .navigation button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background-color: transparent;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .navigation button.active {
+            background-color: var(--primary);
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: background-color 0.3s ease;
+        }
+
+        .fullscreen-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        .slide-number {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            font-size: 1rem;
+            color: var(--text-light);
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .slide h1 {
+                font-size: 2.5rem;
+            }
+
+            .slide h2 {
+                font-size: 2rem;
+            }
+
+            .slide h3 {
+                font-size: 1.5rem;
+            }
+
+            .slide p {
+                font-size: 1rem;
+            }
+
+            .slide .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">全屏</button>
+    <div class="slide-number" id="slideNumber">1 / 12</div>
+
+    <div class="presentation" id="presentation">
+        <!-- 封面页 -->
+        <div class="slide active" id="slide1">
+            <h1>CorvusNote</h1>
+            <p class="subtitle">基于LangChain的智能对话平台</p>
+            <p>毕业设计答辩</p>
+            <p style="margin-top: 3rem; font-size: 1rem; color: var(--text-light)">2026年4月</p>
+        </div>
+
+        <!-- 项目概述 -->
+        <div class="slide" id="slide2">
+            <h2>项目概述</h2>
+            <div class="content">
+                <p>CorvusNote是一个基于LangChain的智能对话平台，旨在为用户提供高效、智能的知识管理和对话交互体验。</p>
+                <p>通过集成多种AI模型，结合知识库管理和笔记功能，实现了智能问答、内容分析和思维导图生成等功能。</p>
+            </div>
+        </div>
+
+        <!-- 核心功能 -->
+        <div class="slide" id="slide3">
+            <h2>核心功能</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>智能对话</h3>
+                    <p>支持多轮对话，集成多种AI模型，提供流式响应，实现自然语言交互。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>知识库管理</h3>
+                    <p>个人知识库与共享知识库相结合，支持文件上传和内容分析。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>笔记管理</h3>
+                    <p>实时编辑和保存笔记，支持防抖同步，确保数据安全。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>思维导图生成</h3>
+                    <p>基于AI分析内容，自动生成结构化思维导图，帮助用户理解和记忆。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>多模型支持</h3>
+                    <p>支持Qwen3.5、GLM-5、MiniMax等多种AI模型，满足不同场景需求。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>用户认证</h3>
+                    <p>支持注册登录和游客模式，保护用户隐私和数据安全。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技术栈 -->
+        <div class="slide" id="slide4">
+            <h2>技术栈</h2>
+            <div class="tech-stack">
+                <div class="tech-item">React</div>
+                <div class="tech-item">Vite</div>
+                <div class="tech-item">Express</div>
+                <div class="tech-item">MongoDB</div>
+                <div class="tech-item">LangChain</div>
+                <div class="tech-item">OpenAI API</div>
+                <div class="tech-item">bcrypt</div>
+                <div class="tech-item">jsonwebtoken</div>
+                <div class="tech-item">markmap</div>
+                <div class="tech-item">mind-elixir</div>
+                <div class="tech-item">react-markdown</div>
+            </div>
+        </div>
+
+        <!-- 系统架构 -->
+        <div class="slide" id="slide5">
+            <h2>系统架构</h2>
+            <div class="architecture">
+                <svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 前端层 -->
+                    <rect x="50" y="50" width="700" height="100" rx="8" fill="#f5f5f7" stroke="#e0e0e0" stroke-width="2"/>
+                    <text x="400" y="100" text-anchor="middle" font-size="16" font-weight="600">前端层 (React + Vite)</text>
+                    <text x="400" y="130" text-anchor="middle" font-size="14">用户界面、状态管理、组件渲染</text>
+
+                    <!-- 后端层 -->
+                    <rect x="50" y="180" width="700" height="100" rx="8" fill="#f5f5f7" stroke="#e0e0e0" stroke-width="2"/>
+                    <text x="400" y="230" text-anchor="middle" font-size="16" font-weight="600">后端层 (Express)</text>
+                    <text x="400" y="260" text-anchor="middle" font-size="14">API服务、认证授权、业务逻辑</text>
+
+                    <!-- 数据与AI层 -->
+                    <rect x="50" y="310" width="700" height="80" rx="8" fill="#f5f5f7" stroke="#e0e0e0" stroke-width="2"/>
+                    <text x="400" y="350" text-anchor="middle" font-size="16" font-weight="600">数据与AI层</text>
+                    <text x="400" y="375" text-anchor="middle" font-size="14">MongoDB + LangChain + OpenAI API</text>
+
+                    <!-- 连接线 -->
+                    <line x1="400" y1="150" x2="400" y2="180" stroke="#0071e3" stroke-width="2"/>
+                    <line x1="400" y1="280" x2="400" y2="310" stroke="#0071e3" stroke-width="2"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 技术路线 -->
+        <div class="slide" id="slide6">
+            <h2>技术路线</h2>
+            <div class="workflow">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>需求分析与设计</h4>
+                        <p>分析用户需求，设计系统架构和功能模块，确定技术栈和开发计划。</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>前端开发</h4>
+                        <p>使用React和Vite构建用户界面，实现组件化开发和响应式设计。</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>后端开发</h4>
+                        <p>基于Express构建RESTful API，实现用户认证、数据存储和业务逻辑。</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>AI服务集成</h4>
+                        <p>集成LangChain和OpenAI API，实现智能对话和内容分析功能。</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>测试与优化</h4>
+                        <p>进行功能测试和性能优化，确保系统稳定运行和良好的用户体验。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 独特之处 -->
+        <div class="slide" id="slide7">
+            <h2>独特之处</h2>
+            <div class="content">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>流式响应</h3>
+                        <p>采用SSE (Server-Sent Events) 技术实现AI响应的流式输出，提升用户体验。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>多模型支持</h3>
+                        <p>集成多种AI模型，用户可根据需求选择不同模型，提高灵活性。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>知识库管理</h3>
+                        <p>支持个人和共享知识库，实现知识的有效管理和复用。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>思维导图生成</h3>
+                        <p>基于AI分析内容，自动生成结构化思维导图，帮助用户理解和记忆。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>实时笔记同步</h3>
+                        <p>采用防抖技术实现笔记的实时同步，确保数据安全和用户体验。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>安全认证</h3>
+                        <p>使用JWT和bcrypt实现安全的用户认证和数据保护。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 改进与优化 -->
+        <div class="slide" id="slide8">
+            <h2>改进与优化</h2>
+            <div class="content">
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>性能优化</h4>
+                            <p>优化前端渲染和后端API响应速度，减少加载时间，提升用户体验。</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>安全性提升</h4>
+                            <p>加强用户认证和数据保护，防止未授权访问和数据泄露。</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>功能扩展</h4>
+                            <p>增加更多AI模型支持，扩展知识库管理功能，提升系统的实用性。</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>用户体验改进</h4>
+                            <p>优化界面设计，简化操作流程，提升用户体验的流畅性和直观性。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 优势分析 -->
+        <div class="slide" id="slide9">
+            <h2>优势分析</h2>
+            <div class="comparison">
+                <table>
+                    <tr>
+                        <th>特性</th>
+                        <th>CorvusNote</th>
+                        <th>传统对话系统</th>
+                    </tr>
+                    <tr>
+                        <td>多模型支持</td>
+                        <td>✓ 支持多种AI模型</td>
+                        <td>× 单一模型</td>
+                    </tr>
+                    <tr>
+                        <td>知识库管理</td>
+                        <td>✓ 个人和共享知识库</td>
+                        <td>× 无知识库功能</td>
+                    </tr>
+                    <tr>
+                        <td>流式响应</td>
+                        <td>✓ 实时流式输出</td>
+                        <td>× 完整响应后输出</td>
+                    </tr>
+                    <tr>
+                        <td>思维导图生成</td>
+                        <td>✓ AI自动生成</td>
+                        <td>× 无此功能</td>
+                    </tr>
+                    <tr>
+                        <td>笔记管理</td>
+                        <td>✓ 实时同步</td>
+                        <td>× 无笔记功能</td>
+                    </tr>
+                    <tr>
+                        <td>用户认证</td>
+                        <td>✓ JWT安全认证</td>
+                        <td>× 简单认证或无认证</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 系统演示 -->
+        <div class="slide" id="slide10">
+            <h2>系统演示</h2>
+            <div class="demo">
+                <svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 界面模拟 -->
+                    <rect x="50" y="50" width="700" height="350" rx="8" fill="#f5f5f7" stroke="#e0e0e0" stroke-width="2"/>
+                    
+                    <!-- 顶部导航 -->
+                    <rect x="50" y="50" width="700" height="50" rx="8 8 0 0" fill="#ffffff" stroke="#e0e0e0" stroke-width="2"/>
+                    <text x="80" y="80" font-size="14" font-weight="600">CorvusNote</text>
+                    
+                    <!-- 左侧菜单 -->
+                    <rect x="50" y="100" width="200" height="300" rx="0 0 0 8" fill="#ffffff" stroke="#e0e0e0" stroke-width="2"/>
+                    <rect x="60" y="120" width="180" height="40" rx="6" fill="#0071e3"/>
+                    <text x="150" y="145" text-anchor="middle" font-size="14" fill="white">新对话</text>
+                    <rect x="60" y="170" width="180" height="40" rx="6" fill="#f5f5f7"/>
+                    <text x="150" y="195" text-anchor="middle" font-size="14">知识库</text>
+                    <rect x="60" y="220" width="180" height="40" rx="6" fill="#f5f5f7"/>
+                    <text x="150" y="245" text-anchor="middle" font-size="14">笔记</text>
+                    
+                    <!-- 右侧内容区 -->
+                    <rect x="250" y="100" width="500" height="300" rx="0 8 8 0" fill="#ffffff" stroke="#e0e0e0" stroke-width="2"/>
+                    
+                    <!-- 对话内容 -->
+                    <rect x="270" y="120" width="120" height="60" rx="6" fill="#e6f2ff"/>
+                    <text x="330" y="150" text-anchor="middle" font-size="12">你好，我想了解LangChain</text>
+                    <rect x="370" y="200" width="180" height="80" rx="6" fill="#f5f5f7"/>
+                    <text x="460" y="230" text-anchor="middle" font-size="12">LangChain是一个用于开发基于语言模型的应用程序的框架...</text>
+                    
+                    <!-- 输入框 -->
+                    <rect x="270" y="350" width="420" height="30" rx="15" fill="#f5f5f7"/>
+                    <text x="290" y="370" font-size="12" fill="#86868b">输入你的问题...</text>
+                    <circle cx="650" cy="365" r="12" fill="#0071e3"/>
+                    <text x="650" y="368" text-anchor="middle" font-size="12" fill="white">→</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 未来展望 -->
+        <div class="slide" id="slide11">
+            <h2>未来展望</h2>
+            <div class="content">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>模型优化</h3>
+                        <p>集成更多先进的AI模型，提升对话质量和响应速度。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>功能扩展</h3>
+                        <p>增加更多实用功能，如语音输入、多语言支持等。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>云服务部署</h3>
+                        <p>部署到云平台，提供更稳定、可扩展的服务。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>移动应用</h3>
+                        <p>开发移动应用，实现跨平台访问，提升用户便捷性。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>社区建设</h3>
+                        <p>建立用户社区，促进知识共享和系统改进。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>商业化探索</h3>
+                        <p>探索商业模式，实现系统的可持续发展。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结论 -->
+        <div class="slide" id="slide12">
+            <h2>结论</h2>
+            <div class="conclusion">
+                <p>CorvusNote是一个功能强大、设计优雅的智能对话平台，通过集成先进的AI技术和用户友好的界面，为用户提供了高效、智能的知识管理和对话交互体验。</p>
+                <p>项目展示了如何将现代前端技术、后端服务和AI能力相结合，构建一个完整的智能应用系统。</p>
+                <p>通过持续的改进和优化，CorvusNote有望成为用户日常工作和学习的得力助手，为智能对话系统的发展做出贡献。</p>
+                <p style="margin-top: 3rem; font-size: 1.5rem; font-weight: 600; color: var(--primary)">谢谢聆听！</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation" id="navigation">
+        <button class="active" onclick="goToSlide(1)"></button>
+        <button onclick="goToSlide(2)"></button>
+        <button onclick="goToSlide(3)"></button>
+        <button onclick="goToSlide(4)"></button>
+        <button onclick="goToSlide(5)"></button>
+        <button onclick="goToSlide(6)"></button>
+        <button onclick="goToSlide(7)"></button>
+        <button onclick="goToSlide(8)"></button>
+        <button onclick="goToSlide(9)"></button>
+        <button onclick="goToSlide(10)"></button>
+        <button onclick="goToSlide(11)"></button>
+        <button onclick="goToSlide(12)"></button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 12;
+
+        function goToSlide(slideNumber) {
+            // 隐藏当前幻灯片
+            document.getElementById(`slide${currentSlide}`).classList.remove('active');
+            document.getElementById('navigation').children[currentSlide - 1].classList.remove('active');
+
+            // 显示目标幻灯片
+            currentSlide = slideNumber;
+            document.getElementById(`slide${currentSlide}`).classList.add('active');
+            document.getElementById('navigation').children[currentSlide - 1].classList.add('active');
+
+            // 更新幻灯片编号
+            document.getElementById('slideNumber').textContent = `${currentSlide} / ${totalSlides}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                goToSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                goToSlide(currentSlide - 1);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // 键盘事件监听
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // 触摸事件监听（移动端）
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX) {
+                nextSlide();
+            } else if (touchEndX > touchStartX) {
+                prevSlide();
+            }
+        }
+    </script>
+</body>
+</html>

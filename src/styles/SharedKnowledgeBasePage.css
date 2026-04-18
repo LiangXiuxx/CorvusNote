@@ -1,0 +1,1035 @@
+/* 共享知识库页面样式 */
+.shared-knowledge-base-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f5f5f5;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 侧边栏样式 - 隐藏 */
+.shared-knowledge-base-page .side-bar {
+  display: none;
+}
+
+/* 主内容区样式 */
+.shared-knowledge-base-page .main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+}
+
+/* 确保页面头部在左上角 */
+.shared-knowledge-base-page .page-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 10px 30px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  position: relative;
+  z-index: 100;
+}
+
+.shared-knowledge-base-page .header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+  margin-right: auto;
+  height: 50px;
+}
+
+.shared-knowledge-base-page .logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+}
+
+/* 详情页内容样式 */
+.shared-knowledge-base-page .detail-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* 详情页布局 */
+.shared-knowledge-base-page .detail-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+/* Logo样式 */
+.shared-knowledge-base-page .logo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  margin-left: -10px;
+  margin-bottom: 5px;
+}
+
+.shared-knowledge-base-page .raven-icon {
+  width: 50px;
+  height: 50px;
+  background-image: url('/curvus.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.shared-knowledge-base-page .page-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  white-space: nowrap;
+  line-height: 50px;
+}
+
+.shared-knowledge-base-page .user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.shared-knowledge-base-page .user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.shared-knowledge-base-page .username {
+  font-size: 16px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .logout-btn {
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.shared-knowledge-base-page .logout-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* 发现页内容样式 */
+.shared-knowledge-base-page .discover-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* 搜索栏样式 */
+.shared-knowledge-base-page .search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.shared-knowledge-base-page .search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.shared-knowledge-base-page .search-input:focus {
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.25);
+}
+
+.shared-knowledge-base-page .search-btn {
+  padding: 0 20px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shared-knowledge-base-page .search-btn:hover {
+  background-color: #555;
+}
+
+/* 分类标签样式 */
+.shared-knowledge-base-page .category-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.shared-knowledge-base-page .category-tab {
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.shared-knowledge-base-page .category-tab:hover {
+  background-color: #f5f5f5;
+}
+
+.shared-knowledge-base-page .category-tab.active {
+  background-color: #333;
+  color: white;
+  border-color: #333;
+}
+
+/* 知识库网格样式 */
+.shared-knowledge-base-page .knowledge-bases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 知识库卡片样式 */
+.shared-knowledge-base-page .knowledge-base-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shared-knowledge-base-page .knowledge-base-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.shared-knowledge-base-page .kb-card-header {
+  height: 180px;
+  overflow: hidden;
+}
+
+.shared-knowledge-base-page .kb-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.shared-knowledge-base-page .knowledge-base-card:hover .kb-cover {
+  transform: scale(1.05);
+}
+
+.shared-knowledge-base-page .kb-card-body {
+  padding: 20px;
+}
+
+.shared-knowledge-base-page .kb-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .kb-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.shared-knowledge-base-page .kb-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shared-knowledge-base-page .kb-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shared-knowledge-base-page .author-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.shared-knowledge-base-page .author-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .kb-stats {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: #999;
+}
+
+.shared-knowledge-base-page .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 详情页内容样式 */
+.shared-knowledge-base-page .detail-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+/* 详情页布局 */
+.shared-knowledge-base-page .detail-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* 左侧面板 */
+.shared-knowledge-base-page .left-panel {
+  flex: 1;
+  background-color: white;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* 知识库简介 */
+.shared-knowledge-base-page .kb-info {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: white;
+}
+
+.shared-knowledge-base-page .back-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.shared-knowledge-base-page .back-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.shared-knowledge-base-page .kb-header-info {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.shared-knowledge-base-page .kb-header-cover {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shared-knowledge-base-page .kb-header-details {
+  flex: 1;
+}
+
+.shared-knowledge-base-page .kb-header-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .kb-header-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.shared-knowledge-base-page .kb-header-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shared-knowledge-base-page .kb-header-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shared-knowledge-base-page .kb-header-stats {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 文件结构 */
+.shared-knowledge-base-page .file-structure {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* 右侧面板 */
+.shared-knowledge-base-page .right-panel {
+  flex: 1;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* 聊天区域 */
+.shared-knowledge-base-page .chat-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.shared-knowledge-base-page .section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .folders-section {
+  margin-bottom: 30px;
+}
+
+.shared-knowledge-base-page .folder-item {
+  margin-bottom: 15px;
+}
+
+.shared-knowledge-base-page .folder-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.shared-knowledge-base-page .folder-header:hover {
+  background-color: #f5f5f5;
+}
+
+.shared-knowledge-base-page .folder-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.shared-knowledge-base-page .folder-content {
+  margin-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shared-knowledge-base-page .file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.shared-knowledge-base-page .file-item:hover {
+  background-color: #f5f5f5;
+}
+
+.shared-knowledge-base-page .file-name {
+  flex: 1;
+  font-size: 13px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .file-size {
+  font-size: 12px;
+  color: #999;
+}
+
+/* 右侧预览区域样式 */
+.shared-knowledge-base-page .preview-section {
+  flex: 1;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.shared-knowledge-base-page .preview-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shared-knowledge-base-page .preview-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.shared-knowledge-base-page .preview-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  justify-content: flex-start;
+  background-color: #f9f9f9;
+}
+
+.shared-knowledge-base-page .file-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.shared-knowledge-base-page .markdown-content {
+  line-height: 1.6;
+  color: #333;
+}
+
+.shared-knowledge-base-page .markdown-content h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .markdown-content h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px 0 15px 0;
+  color: #333;
+}
+
+.shared-knowledge-base-page .markdown-content h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 15px 0 10px 0;
+  color: #333;
+}
+
+.shared-knowledge-base-page .markdown-content p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.shared-knowledge-base-page .markdown-content li {
+  margin-bottom: 8px;
+  margin-left: 20px;
+}
+
+.shared-knowledge-base-page .no-file-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  text-align: center;
+  gap: 20px;
+}
+
+.shared-knowledge-base-page .no-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  text-align: center;
+}
+
+.shared-knowledge-base-page .file-item.active {
+  background-color: #e3f2fd;
+  border-left: 3px solid #1976d2;
+}
+
+.shared-knowledge-base-page .file-item {
+  cursor: pointer;
+}
+
+
+
+/* 创建知识库按钮 */
+.shared-knowledge-base-page .create-kb-btn {
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shared-knowledge-base-page .create-kb-btn:hover {
+  background-color: #555;
+}
+
+.shared-knowledge-base-page .create-kb-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 模态框样式 */
+.shared-knowledge-base-page .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.shared-knowledge-base-page .modal-content {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  overflow: hidden;
+}
+
+.shared-knowledge-base-page .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f9f9f9;
+}
+
+.shared-knowledge-base-page .modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.shared-knowledge-base-page .modal-header .close-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.shared-knowledge-base-page .modal-header .close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.shared-knowledge-base-page .modal-body {
+  padding: 30px;
+}
+
+.shared-knowledge-base-page .form-group {
+  margin-bottom: 20px;
+}
+
+.shared-knowledge-base-page .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.shared-knowledge-base-page .form-group input,
+.shared-knowledge-base-page .form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.shared-knowledge-base-page .form-group input:focus,
+.shared-knowledge-base-page .form-group textarea:focus {
+  border-color: #333;
+  box-shadow: 0 0 0 0.2rem rgba(51, 51, 51, 0.25);
+}
+
+.shared-knowledge-base-page .form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.shared-knowledge-base-page .cover-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shared-knowledge-base-page .cover-preview {
+  width: 100%;
+  height: 200px;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #f9f9f9;
+}
+
+.shared-knowledge-base-page .cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shared-knowledge-base-page .cover-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #666;
+}
+
+.shared-knowledge-base-page .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px 30px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #f9f9f9;
+}
+
+.shared-knowledge-base-page .cancel-btn {
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.shared-knowledge-base-page .cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.shared-knowledge-base-page .submit-btn {
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.shared-knowledge-base-page .submit-btn:hover {
+  background-color: #555;
+}
+
+/* 文档查看模态框 */
+.shared-knowledge-base-page .document-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.shared-knowledge-base-page .document-modal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.shared-knowledge-base-page .document-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fafafa;
+}
+
+.shared-knowledge-base-page .document-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+
+.shared-knowledge-base-page .document-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shared-knowledge-base-page .download-btn {
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.shared-knowledge-base-page .download-btn:hover {
+  background-color: #555;
+}
+
+.shared-knowledge-base-page .close-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.shared-knowledge-base-page .close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.shared-knowledge-base-page .document-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.shared-knowledge-base-page .document-content {
+  max-width: 100%;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* 加载状态 */
+.shared-knowledge-base-page .loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+.shared-knowledge-base-page .loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.shared-knowledge-base-page .loading-text {
+  color: #666;
+  font-size: 16px;
+}
+
+/* 文档内容样式 */
+.shared-knowledge-base-page .document-h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 24px 0 16px 0;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 12px;
+}
+
+.shared-knowledge-base-page .document-h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 20px 0 12px 0;
+  color: #333;
+}
+
+.shared-knowledge-base-page .document-h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  color: #333;
+}
+
+.shared-knowledge-base-page .document-paragraph {
+  margin: 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .document-list-item {
+  margin: 8px 0 8px 24px;
+  font-size: 16px;
+  color: #333;
+}
+
+.shared-knowledge-base-page .document-content br {
+  margin: 8px 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .shared-knowledge-base-page .detail-body {
+    flex-direction: column;
+  }
+  
+  .shared-knowledge-base-page .file-structure {
+    width: 100%;
+    max-height: 300px;
+  }
+  
+  .shared-knowledge-base-page .knowledge-bases-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .shared-knowledge-base-page .kb-header-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .shared-knowledge-base-page .kb-header-cover {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .shared-knowledge-base-page .kb-header-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .shared-knowledge-base-page .document-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .shared-knowledge-base-page .document-modal-content {
+    padding: 20px;
+  }
+}
