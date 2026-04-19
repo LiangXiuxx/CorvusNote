@@ -130,3 +130,123 @@ export const deleteNoteApi = async (id) => {
   })
   if (!res.ok) throw new Error('删除笔记失败')
 }
+
+// ── Shared Knowledge Bases ────────────────────────────────────────
+
+export const fetchPublicKBs = async ({ category, search, skip = 0, limit = 20 } = {}) => {
+  let url = `${API_BASE}/api/shared-kb/public?skip=${skip}&limit=${limit}`
+  if (category) url += `&category=${encodeURIComponent(category)}`
+  if (search) url += `&search=${encodeURIComponent(search)}`
+  const res = await request(url, { headers: authHeaders() })
+  if (!res.ok) throw new Error('获取公开知识库失败')
+  return res.json()
+}
+
+export const fetchMyCreatedKBs = async ({ skip = 0, limit = 100 } = {}) => {
+  const res = await request(
+    `${API_BASE}/api/shared-kb/my-created?skip=${skip}&limit=${limit}`,
+    { headers: authHeaders() }
+  )
+  if (!res.ok) throw new Error('获取我创建的知识库失败')
+  return res.json()
+}
+
+export const fetchMyJoinedKBs = async () => {
+  const res = await request(`${API_BASE}/api/shared-kb/my-joined`, {
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('获取我加入的知识库失败')
+  return res.json()
+}
+
+export const fetchSharedKBDetail = async (id) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${id}`, {
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('获取知识库详情失败')
+  return res.json()
+}
+
+export const createSharedKB = async ({ name, description, category, is_public, cover }) => {
+  const formData = new FormData()
+  formData.append('name', name)
+  formData.append('description', description || '')
+  formData.append('category', category || '推荐')
+  formData.append('is_public', is_public || false)
+  if (cover) formData.append('cover', cover)
+
+  const res = await request(`${API_BASE}/api/shared-kb`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('corvusNoteToken') || ''}`,
+    },
+    body: formData,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '创建失败' }))
+    throw new Error(err.detail || '创建知识库失败')
+  }
+  return res.json()
+}
+
+export const updateSharedKB = async (id, { name, description, category, is_public, cover }) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ name, description, category, is_public, cover }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '更新失败' }))
+    throw new Error(err.detail || '更新知识库失败')
+  }
+  return res.json()
+}
+
+export const deleteSharedKB = async (id) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('删除知识库失败')
+}
+
+export const joinSharedKB = async (id) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${id}/join`, {
+    method: 'POST',
+    headers: authHeaders(),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '加入失败' }))
+    throw new Error(err.detail || '加入知识库失败')
+  }
+  return res.json()
+}
+
+export const quitSharedKB = async (id) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${id}/quit`, {
+    method: 'POST',
+    headers: authHeaders(),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '退出失败' }))
+    throw new Error(err.detail || '退出知识库失败')
+  }
+}
+
+export const uploadToSharedKB = async (kbId, file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await request(`${API_BASE}/api/shared-kb/${kbId}/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('corvusNoteToken') || ''}`,
+    },
+    body: formData,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '上传失败' }))
+    throw new Error(err.detail || '上传文件失败')
+  }
+  return res.json()
+}

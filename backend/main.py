@@ -7,7 +7,7 @@ from pymongo import ASCENDING, DESCENDING
 from bson.objectid import ObjectId
 from app.core.config import settings
 from app.core.database import get_db, close_db
-from app.api import auth, users, conversations, messages, notes, knowledge_bases, chat
+from app.api import auth, users, conversations, messages, notes, knowledge_bases, chat, shared_kb
 
 # 确保上传目录和向量存储目录存在
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
@@ -128,6 +128,7 @@ app.include_router(messages.router)
 app.include_router(notes.router)
 app.include_router(knowledge_bases.router)
 app.include_router(chat.router)
+app.include_router(shared_kb.router)
 
 @app.get("/")
 async def root():

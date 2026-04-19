@@ -181,10 +181,12 @@
   flex-direction: column;
   gap: 15px;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .input-container.focused {
   border: 2px solid #000000;
+  padding: 14px 19px;
 }
 
 .input-wrapper {

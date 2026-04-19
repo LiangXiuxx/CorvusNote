@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import '../styles/HomePage.css'
 import { DEFAULT_PERSONAL_KNOWLEDGE_BASES } from '../utils/defaultKnowledgeBases'
 
-function HomePage({ onSendQuestion, user, onLogout, onShowSettings, onGoToKnowledgeBase, onGoToSharedKnowledgeBase, onGoToConversations, onGoToNotes, onGoToAdminPage, models, selectedModel, onModelChange, enableThinking = false, onToggleThinking, thinkingSupported = false }) {
+function HomePage({ onSendQuestion, user, onLogout, onShowSettings, onGoToKnowledgeBase, onGoToSharedKnowledgeBase, onGoToConversations, onGoToNotes, onGoToAdminPage, models, selectedModel, onModelChange }) {
   const [question, setQuestion] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const [isInputFocused, setIsInputFocused] = useState(false)
@@ -274,7 +274,7 @@ function HomePage({ onSendQuestion, user, onLogout, onShowSettings, onGoToKnowle
               )}
               
               <div className="input-actions">
-                  {/* 左侧：模型选择 + 深度思考 */}
+                  {/* 左侧：模型选择 */}
                   <div className="left-actions">
                     <select
                       className="model-select"
@@ -287,20 +287,8 @@ function HomePage({ onSendQuestion, user, onLogout, onShowSettings, onGoToKnowle
                         </option>
                       ))}
                     </select>
-                    <button
-                      type="button"
-                      className={`thinking-toggle-btn${enableThinking ? ' active' : ''}${!thinkingSupported ? ' disabled' : ''}`}
-                      onClick={onToggleThinking}
-                      disabled={!thinkingSupported}
-                      title={thinkingSupported ? (enableThinking ? '关闭深度思考' : '开启深度思考') : '当前模型不支持深度思考'}
-                    >
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style={{marginRight: 4, flexShrink: 0}}>
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm1 14h-2v-1h2v1zm0-3h-2V9.41l-1.29-1.3 1.41-1.41L12 7.83l.88-.88 1.42 1.41-1.3 1.3V13z"/>
-                      </svg>
-                      深度思考
-                    </button>
                   </div>
-                
+
                 {/* 中间：显示已选择的文件名 */}
                 <div className="middle-actions">
                   {selectedFile && (

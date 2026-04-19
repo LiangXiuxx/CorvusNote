@@ -569,7 +569,7 @@
   background-color: #333;
   color: white;
   margin-left: auto;
-  margin-right: 0;
+  margin-right: 46px;
   border-bottom-right-radius: 5px;
   border-top-right-radius: 5px;
   border-bottom-left-radius: 20px;
@@ -767,10 +767,12 @@
   flex-direction: column;
   gap: 15px;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .input-container.focused {
   border: 2px solid #000000;
+  padding: 14px 19px;
 }
 
 .input-wrapper {
@@ -859,7 +861,7 @@
   }
   50% {
     opacity: 0.6;
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
 }
 
