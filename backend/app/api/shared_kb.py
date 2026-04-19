@@ -217,7 +217,7 @@ async def get_my_joined_kb(
     kbs = shared_kb_model.get_by_ids(kb_ids)
 
     # 按加入时间排序
-    kb_map = {str(kb["_id"]: kb for kb in kbs}
+    kb_map = {str(kb["_id"]): kb for kb in kbs}
     result = []
     for m in memberships:
         kb = kb_map.get(str(m["kb_id"]))

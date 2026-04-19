@@ -142,6 +142,28 @@
   position: relative;
 }
 
+/* 搜索框样式 */
+.sidebar-search {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 6px 10px 6px 28px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sidebar-search input:focus {
+  border-color: #333;
+  background-color: #fff;
+}
+
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -773,6 +795,7 @@
 .input-container.focused {
   border: 2px solid #000000;
   padding: 14px 19px;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
 .input-wrapper {

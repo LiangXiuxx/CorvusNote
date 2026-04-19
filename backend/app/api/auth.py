@@ -20,10 +20,10 @@ async def register(user_data: UserCreate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered"
         )
-    
+
     # 密码加密
     hashed_password = get_password_hash(user_data.password)
-    
+
     # 创建用户：注册接口始终创建普通用户，忽略请求体中的 is_admin / is_guest 字段
     new_user = user_model.create({
         "username": user_data.username,
@@ -34,7 +34,7 @@ async def register(user_data: UserCreate):
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     })
-    
+
     # 转换为响应模型
     return User(
         id=str(new_user["_id"]),
@@ -56,14 +56,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # 创建访问令牌
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user["_id"]), "username": user["username"]},
         expires_delta=access_token_expires
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:

@@ -1053,8 +1053,8 @@ function ChatPage({ messages, setMessages, onNewChat, user, onLogout, onShowSett
 
               {/* 对话搜索框 */}
               <div style={{ padding: '0 12px 8px' }}>
-                <div style={{ position: 'relative' }}>
-                  <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="13" height="13" style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <div className="sidebar-search">
+                  <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="13" height="13" style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }}>
                     <path d="M839.566222 774.826667l170.894222 170.922666a45.539556 45.539556 0 0 1 0 64.796445 46.136889 46.136889 0 0 1-32.398222 13.454222 46.136889 46.136889 0 0 1-32.398222-13.454222L774.826667 839.68a473.713778 473.713778 0 0 1-636.017778-30.833778A473.827556 473.827556 0 0 1 473.770667 0C735.402667 0 947.484444 212.110222 947.484444 473.799111c0 112.213333-39.594667 217.941333-107.946666 301.056zM473.770667 91.733333c-210.887111 0.341333-381.724444 171.207111-382.065778 382.094223 0 211.000889 171.064889 382.094222 382.065778 382.094222s382.037333-171.093333 382.037333-382.094222c0-211.029333-171.036444-382.094222-382.037333-382.094223z" fill="#aaa"/>
                   </svg>
                   <input
@@ -1062,7 +1062,6 @@ function ChatPage({ messages, setMessages, onNewChat, user, onLogout, onShowSett
                     placeholder="搜索对话..."
                     value={convSearch}
                     onChange={e => setConvSearch(e.target.value)}
-                    style={{ width: '100%', padding: '6px 10px 6px 28px', borderRadius: 6, border: '1px solid #ddd', fontSize: 13, boxSizing: 'border-box', outline: 'none' }}
                   />
                 </div>
               </div>
