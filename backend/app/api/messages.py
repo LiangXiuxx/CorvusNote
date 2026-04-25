@@ -53,7 +53,7 @@ async def create_message(conversation_id: str, message_data: MessageCreate, curr
 async def get_messages(
     conversation_id: str,
     skip: int = Query(0, ge=0),
-    limit: int = Query(200, ge=1, le=1000),
+    limit: int = Query(50, ge=1, le=200),
     current_user: dict = Depends(get_current_user),
 ):
     # 检查对话是否存在且属于当前用户

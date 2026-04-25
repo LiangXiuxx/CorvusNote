@@ -15,15 +15,17 @@ async def create_note(note_data: NoteCreate, current_user: dict = Depends(get_cu
         "user_id": ObjectId(current_user["_id"]),
         "title": note_data.title,
         "content": note_data.content,
+        "images": {},
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     })
-    
+
     return Note(
         id=str(new_note["_id"]),
         user_id=str(new_note["user_id"]),
         title=new_note["title"],
         content=new_note["content"],
+        images=new_note.get("images", {}),
         created_at=new_note["created_at"],
         updated_at=new_note["updated_at"]
     )
@@ -41,6 +43,7 @@ async def get_notes(
             user_id=str(note["user_id"]),
             title=note["title"],
             content=note["content"],
+            images=note.get("images", {}),
             created_at=note["created_at"],
             updated_at=note["updated_at"]
         )
@@ -67,6 +70,7 @@ async def get_note(note_id: str, current_user: dict = Depends(get_current_user))
         user_id=str(note["user_id"]),
         title=note["title"],
         content=note["content"],
+        images=note.get("images", {}),
         created_at=note["created_at"],
         updated_at=note["updated_at"]
     )
@@ -91,15 +95,18 @@ async def update_note(note_id: str, note_data: NoteUpdate, current_user: dict = 
         update_data["title"] = note_data.title
     if note_data.content is not None:
         update_data["content"] = note_data.content
+    if note_data.images is not None:
+        update_data["images"] = note_data.images
     update_data["updated_at"] = datetime.utcnow()
-    
+
     updated_note = note_model.update(note_id, update_data)
-    
+
     return Note(
         id=str(updated_note["_id"]),
         user_id=str(updated_note["user_id"]),
         title=updated_note["title"],
         content=updated_note["content"],
+        images=updated_note.get("images", {}),
         created_at=updated_note["created_at"],
         updated_at=updated_note["updated_at"]
     )

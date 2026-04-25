@@ -33,35 +33,43 @@ export const AuthProvider = ({ children }) => {
           password: password
         })
       })
-      
+
       if (!response.ok) {
         throw new Error('登录失败')
       }
-      
+
       const data = await response.json()
       const { access_token } = data
-      
+
       // 获取用户信息
       const userResponse = await fetch('/api/users/profile', {
         headers: {
           'Authorization': `Bearer ${access_token}`
         }
       })
-      
+
       if (!userResponse.ok) {
         throw new Error('获取用户信息失败')
       }
-      
+
       const userData = await userResponse.json()
-      
-      // 保存token和用户信息到localStorage
+
+      // 只持久化必要字段，避免 XSS 时暴露冗余信息
+      const safeUserData = {
+        id: userData.id,
+        username: userData.username,
+        is_admin: userData.is_admin,
+        is_guest: userData.is_guest,
+        avatar: userData.avatar,
+      }
+
       localStorage.setItem('corvusNoteToken', access_token)
-      localStorage.setItem('corvusNoteUser', JSON.stringify(userData))
-      
+      localStorage.setItem('corvusNoteUser', JSON.stringify(safeUserData))
+
       setUser(userData)
       return userData
     } catch (error) {
-            throw error
+      throw error
     }
   }
   
@@ -138,7 +146,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = async (updatedUser) => {
     try {
       const token = localStorage.getItem('corvusNoteToken')
-      
+
       const response = await fetch('/api/users/profile', {
         method: 'PUT',
         headers: {
@@ -151,20 +159,28 @@ export const AuthProvider = ({ children }) => {
           avatar: updatedUser.avatar
         })
       })
-      
+
       if (!response.ok) {
         throw new Error('更新用户信息失败')
       }
-      
+
       const updatedUserData = await response.json()
-      
-      // 更新当前用户状态
+
+      // 只持久化必要字段
+      const safeUserData = {
+        id: updatedUserData.id,
+        username: updatedUserData.username,
+        is_admin: updatedUserData.is_admin,
+        is_guest: updatedUserData.is_guest,
+        avatar: updatedUserData.avatar,
+      }
+
       setUser(updatedUserData)
-      localStorage.setItem('corvusNoteUser', JSON.stringify(updatedUserData))
-      
+      localStorage.setItem('corvusNoteUser', JSON.stringify(safeUserData))
+
       return updatedUserData
     } catch (error) {
-            throw error
+      throw error
     }
   }
   
@@ -191,54 +207,53 @@ export const AuthProvider = ({ children }) => {
   
   // 管理员功能：删除指定用户
   const adminDeleteUser = async (userId) => {
-    try {
-      const token = localStorage.getItem('corvusNoteToken')
-      
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error('删除用户失败')
+    const token = localStorage.getItem('corvusNoteToken')
+
+    const response = await fetch(`/api/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-      
-      // 删除用户相关的所有数据
-      localStorage.removeItem(`corvusNoteConversations_${userId}`)
-      localStorage.removeItem(`corvusNoteKnowledgeBase_${userId}`)
-    } catch (error) {
-          }
+    })
+
+    if (!response.ok) {
+      throw new Error('删除用户失败')
+    }
+
+    localStorage.removeItem(`corvusNoteConversations_${userId}`)
+    localStorage.removeItem(`corvusNoteKnowledgeBase_${userId}`)
   }
   
   // 管理员功能：更新用户权限
   const updateUserPermission = async (userId, isAdmin) => {
-    try {
-      const token = localStorage.getItem('corvusNoteToken')
-      
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ is_admin: isAdmin })
-      })
-      
-      if (!response.ok) {
-        throw new Error('更新用户权限失败')
+    const token = localStorage.getItem('corvusNoteToken')
+
+    const response = await fetch(`/api/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ is_admin: isAdmin })
+    })
+
+    if (!response.ok) {
+      throw new Error('更新用户权限失败')
+    }
+
+    const updatedUser = await response.json()
+
+    if (user && user.id === userId) {
+      const safeUserData = {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        is_admin: updatedUser.is_admin,
+        is_guest: updatedUser.is_guest,
+        avatar: updatedUser.avatar,
       }
-      
-      const updatedUser = await response.json()
-      
-      // 如果更新的是当前用户，同时更新用户状态
-      if (user && user.id === userId) {
-        setUser(updatedUser)
-        localStorage.setItem('corvusNoteUser', JSON.stringify(updatedUser))
-      }
-    } catch (error) {
-          }
+      setUser(updatedUser)
+      localStorage.setItem('corvusNoteUser', JSON.stringify(safeUserData))
+    }
   }
   
   // 提供给Context的值

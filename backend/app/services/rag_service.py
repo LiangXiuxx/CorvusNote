@@ -17,6 +17,7 @@ LangChain 集成点：
 import os
 import json
 import shutil
+from collections import OrderedDict
 from dataclasses import dataclass, asdict
 from typing import Optional
 
@@ -115,21 +116,27 @@ def auto_detect_strategy(content: str, filename: str) -> RAGStrategy:
 
 
 # ══════════════════════════════════════════════════════
-# FAISS 内存缓存（进程内，按 kb_id 缓存已加载的向量索引）
+# FAISS 内存缓存（LRU，最多同时持有 20 个索引）
 # ══════════════════════════════════════════════════════
 
-_index_cache: dict[str, "FAISS"] = {}
+_MAX_INDEX_CACHE = 20
+# OrderedDict 保序，move_to_end 实现 O(1) LRU 访问更新
+_index_cache: OrderedDict[str, "FAISS"] = OrderedDict()
 
 
 def _load_store_cached(kb_id: str, embeddings) -> "FAISS | None":
-    """从缓存或磁盘加载 FAISS 索引，加载后写入内存缓存。"""
+    """从 LRU 缓存或磁盘加载 FAISS 索引；容量超限时淘汰最久未用的条目。"""
     if kb_id in _index_cache:
+        _index_cache.move_to_end(kb_id)
         return _index_cache[kb_id]
     index_dir = _index_dir(kb_id)
     if not os.path.isdir(index_dir):
         return None
     store = FAISS.load_local(index_dir, embeddings, allow_dangerous_deserialization=True)
     _index_cache[kb_id] = store
+    if len(_index_cache) > _MAX_INDEX_CACHE:
+        evicted = _index_cache.popitem(last=False)
+        print(f"[RAG] 缓存已满，淘汰索引: {evicted[0]}")
     return store
 
 
@@ -187,18 +194,32 @@ _rewrite_llm = ChatOpenAI(
 _rewrite_chain = _REWRITE_PROMPT | _rewrite_llm | StrOutputParser()
 
 
+# Query Rewrite 结果缓存（相同问题跳过 LLM 调用）
+_rewrite_cache: OrderedDict[str, str] = OrderedDict()
+_REWRITE_CACHE_MAX = 500
+
+
 async def rewrite_query(question: str) -> str:
     """
     用 LCEL 链（ChatPromptTemplate | ChatOpenAI | StrOutputParser）
-    将口语化问题改写为检索友好的简洁短句。失败时降级返回原始问题。
+    将口语化问题改写为检索友好的简洁短句。
+    相同问题命中缓存时直接返回，避免重复调用 LLM。
+    失败时降级返回原始问题。
     """
+    if question in _rewrite_cache:
+        _rewrite_cache.move_to_end(question)
+        return _rewrite_cache[question]
     try:
         rewritten = await _rewrite_chain.ainvoke({"question": question})
         rewritten = rewritten.strip()
-        return rewritten if rewritten else question
+        result = rewritten if rewritten else question
     except Exception as e:
         print(f"[RAG] Query Rewrite 失败，使用原始问题: {e}")
-        return question
+        result = question
+    _rewrite_cache[question] = result
+    if len(_rewrite_cache) > _REWRITE_CACHE_MAX:
+        _rewrite_cache.popitem(last=False)
+    return result
 
 
 # ══════════════════════════════════════════════════════

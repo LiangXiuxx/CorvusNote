@@ -7,16 +7,16 @@ function LoginPage({ onLogin }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { login, loginAsGuest } = useAuth()
+  const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
-    
+
     try {
       await login(username, password)
-      onLogin()
+      onLogin(null, 'login')
     } catch (err) {
       setError('用户名或密码错误')
     } finally {
@@ -25,8 +25,7 @@ function LoginPage({ onLogin }) {
   }
 
   const handleGuestLogin = () => {
-    loginAsGuest()
-    onLogin()
+    onLogin(null, 'guest')
   }
 
   return (

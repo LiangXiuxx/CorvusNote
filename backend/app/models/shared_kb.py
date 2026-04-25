@@ -125,3 +125,32 @@ class SharedKBMemberModel:
 
     def get_member_count(self, kb_id: str) -> int:
         return self.collection.count_documents({"kb_id": ObjectId(kb_id)})
+
+
+class SharedKBFileModel:
+    """共享知识库文件元数据，每条记录对应一个上传的文件。"""
+
+    def __init__(self):
+        self.db = get_db()
+        self.collection: Collection = self.db["shared_kb_files"]
+
+    def create(self, file_data: dict) -> dict:
+        result = self.collection.insert_one(file_data)
+        return self.collection.find_one({"_id": result.inserted_id})
+
+    def get_by_id(self, file_id: str) -> dict | None:
+        return self.collection.find_one({"_id": ObjectId(file_id)})
+
+    def get_by_kb_id(self, kb_id: str) -> list:
+        return list(
+            self.collection.find({"kb_id": ObjectId(kb_id)})
+            .sort("uploaded_at", 1)
+        )
+
+    def delete(self, file_id: str) -> bool:
+        result = self.collection.delete_one({"_id": ObjectId(file_id)})
+        return result.deleted_count > 0
+
+    def delete_by_kb_id(self, kb_id: str) -> int:
+        result = self.collection.delete_many({"kb_id": ObjectId(kb_id)})
+        return result.deleted_count

@@ -14,9 +14,15 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-here"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7 天
+    # 逗号分隔的允许跨域来源列表，生产环境必须设置为精确域名，禁止使用 *
+    ALLOWED_ORIGINS: str = "http://localhost:3001,http://localhost:3000"
     UPLOAD_DIR: str = "./uploads"
     VECTOR_STORE_DIR: str = "./vector_stores"
     DASHSCOPE_API_KEY: str = ""
+
+    @property
+    def allowed_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
 
     @field_validator("SECRET_KEY")
     @classmethod

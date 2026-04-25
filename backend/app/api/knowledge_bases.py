@@ -8,90 +8,13 @@ from app.models.knowledge_base import KnowledgeBaseModel
 from app.schemas.knowledge_base import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBaseUpdate, RAGStrategyConfig
 from app.core.config import settings
 from app.services.rag_service import build_and_save_index, delete_index, RAGStrategy, auto_detect_strategy
+from app.utils.file_utils import decode_file_content, MAX_FILE_SIZE_BYTES, INDEXABLE_EXTENSIONS
 
 router = APIRouter(prefix="/api/knowledge-bases", tags=["knowledge-bases"])
 knowledge_base_model = KnowledgeBaseModel()
 
 # 确保上传目录存在
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-
-# 支持建立向量索引的文件类型
-INDEXABLE_EXTENSIONS = {".txt", ".md", ".markdown", ".pdf", ".docx"}
-
-# 单文件最大上传大小：20 MB（PDF/DOCX 通常比纯文本大）
-MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024
-
-
-def _extract_pdf(raw: bytes) -> str:
-    """从 PDF 字节提取纯文本（pypdf）。"""
-    import io
-    from pypdf import PdfReader
-    reader = PdfReader(io.BytesIO(raw))
-    pages = []
-    for page in reader.pages:
-        text = page.extract_text() or ""
-        if text.strip():
-            pages.append(text)
-    return "\n\n".join(pages)
-
-
-def _extract_docx(raw: bytes) -> str:
-    """从 DOCX 字节提取纯文本（python-docx）。"""
-    import io
-    from docx import Document
-    doc = Document(io.BytesIO(raw))
-    paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-    return "\n\n".join(paragraphs)
-
-
-def _decode_content(raw: bytes, filename: str) -> str | None:
-    """
-    将文件字节解码为字符串。
-    支持：.txt / .md / .markdown（纯文本）、.pdf（pypdf）、.docx（python-docx）。
-    返回 None 表示文件类型不支持索引。
-    抛出 HTTPException(400) 表示解析失败。
-    """
-    ext = os.path.splitext(filename)[1].lower()
-    if ext not in INDEXABLE_EXTENSIONS:
-        return None
-
-    if ext == ".pdf":
-        try:
-            text = _extract_pdf(raw)
-            if not text.strip():
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"PDF [{filename}] 未能提取到文本内容，可能是扫描件或加密文件。",
-                )
-            return text
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"PDF [{filename}] 解析失败: {e}",
-            )
-
-    if ext == ".docx":
-        try:
-            return _extract_docx(raw)
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"DOCX [{filename}] 解析失败: {e}",
-            )
-
-    # .txt / .md / .markdown — 依次尝试 UTF-8 / GBK
-    for encoding in ("utf-8", "gbk"):
-        try:
-            return raw.decode(encoding)
-        except (UnicodeDecodeError, LookupError):
-            continue
-
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"文件 [{filename}] 编码无法识别，请使用 UTF-8 或 GBK 编码保存后重新上传。",
-    )
 
 
 def _build_strategy(
@@ -151,9 +74,15 @@ async def create_knowledge_base(
                 "请拆分文件后分批上传。"
             ),
         )
+    
+    if file_size == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="文件为空，无法处理。请上传非空文件。"
+        )
 
     # ── 2. 解码文本内容（非文本文件返回 None）───────────────────
-    text_content = _decode_content(content, file.filename)
+    text_content = decode_file_content(content, file.filename)
 
     # ── 3. 保存原始文件 ──────────────────────────────────────────
     timestamp = datetime.utcnow().timestamp()
@@ -339,3 +268,111 @@ async def delete_knowledge_base(kb_id: str, current_user: dict = Depends(get_cur
     knowledge_base_model.delete(kb_id)
 
     return None
+
+
+@router.post("/{kb_id}/upload")
+async def upload_to_knowledge_base(
+    kb_id: str,
+    file: UploadFile = File(...),
+    # RAG 策略参数（可选，默认自动）
+    strategy_mode: str = Form("auto"),          # "auto" | "manual"
+    chunk_size: Optional[int] = Form(None),
+    chunk_overlap: Optional[int] = Form(None),
+    top_k: Optional[int] = Form(None),
+    score_threshold: Optional[float] = Form(None),
+    current_user: dict = Depends(get_current_user),
+):
+    # ── 1. 验证知识库存在且用户有权限 ────────────────────────
+    kb = knowledge_base_model.get_by_id(kb_id)
+    if not kb:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge base not found")
+
+    if str(kb["user_id"]) != str(current_user["_id"]) and not current_user.get("is_admin"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+    # ── 2. 读取文件内容 ───────────────────────────────────────
+    try:
+        content = await file.read()
+        file_size = len(content)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"文件读取失败: {str(e)}"
+        )
+
+    if file_size > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=(
+                f"文件过大（{file_size / 1024 / 1024:.1f} MB），"
+                f"最大支持 {MAX_FILE_SIZE_BYTES // 1024 // 1024} MB。"
+                "请拆分文件后分批上传。"
+            ),
+        )
+    
+    if file_size == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="文件为空，无法处理。请上传非空文件。"
+        )
+
+    # ── 3. 解码文本内容（非文本文件返回 None）──────────────────
+    text_content = decode_file_content(content, file.filename)
+
+    # ── 4. 保存原始文件 ───────────────────────────────────────
+    timestamp = datetime.utcnow().timestamp()
+    safe_name = os.path.basename(file.filename)  # 防止路径遍历
+    file_path = os.path.join(
+        settings.UPLOAD_DIR,
+        f"{current_user['_id']}_{timestamp}_{safe_name}"
+    )
+    try:
+        with open(file_path, "wb") as buffer:
+            buffer.write(content)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"文件保存失败: {str(e)}"
+        )
+
+    # ── 5. 构建并持久化向量索引 ────────────────────────────────
+    used_strategy: Optional[RAGStrategy] = None
+    if text_content is not None:
+        try:
+            used_strategy = _build_strategy(
+                strategy_mode=strategy_mode,
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                top_k=top_k,
+                score_threshold=score_threshold,
+                file_content=text_content,
+                file_name=file.filename,
+            )
+            build_and_save_index(
+                kb_id=kb_id,
+                file_content=text_content,
+                file_name=file.filename,
+                strategy=used_strategy,
+            )
+            knowledge_base_model.update(kb_id, {"indexed": True, "updated_at": datetime.utcnow()})
+        except Exception as e:
+            # 回滚
+            try:
+                os.remove(file_path)
+            except OSError:
+                pass
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"向量索引构建失败，请检查 API Key 是否有效: {str(e)}"
+            )
+
+    # ── 6. 返回文件信息 ────────────────────────────────────────
+    return {
+        "id": kb_id,
+        "file_name": file.filename,
+        "file_size": file_size,
+        "file_type": file.content_type,
+        "file_path": file_path,
+        "indexed": text_content is not None,
+        "updated_at": datetime.utcnow()
+    }

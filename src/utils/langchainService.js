@@ -1,6 +1,6 @@
 import { HumanMessage, AIMessage } from '@langchain/core/messages'
 
-const API_BASE = 'http://localhost:8000'
+const API_BASE = ''
 
 // 获取存储在 localStorage 中的 JWT Token
 const getToken = () => localStorage.getItem('corvusNoteToken') || ''

@@ -4,7 +4,8 @@
  * API Key 仅存在于后端，前端不持有任何密钥。
  */
 
-const API_BASE = 'http://localhost:8000'
+// 使用相对路径，通过 Vite 代理转发到后端，彻底避免跨域问题
+const API_BASE = ''
 
 const authHeaders = () => ({
   'Content-Type': 'application/json',
@@ -14,15 +15,23 @@ const authHeaders = () => ({
 /**
  * 统一请求包装：遇到 401 自动清除 token 并跳回登录页，
  * 避免用户卡在"已登录但 token 失效"的状态。
+ * 注意：游客用户不需要 token，所以遇到 401 时不应该清除游客用户信息
  */
 const request = async (url, options) => {
   const res = await fetch(url, options)
   if (res.status === 401) {
-    localStorage.removeItem('corvusNoteToken')
-    localStorage.removeItem('corvusNoteUser')
-    window.location.reload()
-    // reload 后代码不再执行，抛出异常仅作保险
-    throw new Error('登录已过期，请重新登录')
+    // 检查是否是游客用户
+    const userData = localStorage.getItem('corvusNoteUser')
+    const user = userData ? JSON.parse(userData) : null
+    
+    // 只有非游客用户才清除信息并跳回登录页
+    if (!user || !user.isGuest) {
+      localStorage.removeItem('corvusNoteToken')
+      localStorage.removeItem('corvusNoteUser')
+      window.location.reload()
+      // reload 后代码不再执行，抛出异常仅作保险
+      throw new Error('登录已过期，请重新登录')
+    }
   }
   return res
 }
@@ -113,11 +122,11 @@ export const createNoteApi = async ({ title, content }) => {
   return res.json()
 }
 
-export const updateNoteApi = async (id, { title, content }) => {
+export const updateNoteApi = async (id, { title, content, images }) => {
   const res = await request(`${API_BASE}/api/notes/${id}`, {
     method: 'PUT',
     headers: authHeaders(),
-    body: JSON.stringify({ title, content }),
+    body: JSON.stringify({ title, content, images }),
   })
   if (!res.ok) throw new Error('更新笔记失败')
   return res.json()
@@ -238,6 +247,112 @@ export const uploadToSharedKB = async (kbId, file) => {
   formData.append('file', file)
 
   const res = await request(`${API_BASE}/api/shared-kb/${kbId}/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('corvusNoteToken') || ''}`,
+    },
+    body: formData,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '上传失败' }))
+    throw new Error(err.detail || '上传文件失败')
+  }
+  return res.json()
+}
+
+export const fetchSharedKBFiles = async (kbId) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${kbId}/files`, {
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('获取文件列表失败')
+  return res.json()
+}
+
+export const fetchSharedKBFileContent = async (kbId, fileId) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${kbId}/files/${fileId}/content`, {
+    headers: authHeaders(),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '获取文件内容失败' }))
+    throw new Error(err.detail || '获取文件内容失败')
+  }
+  return res.json()
+}
+
+export const deleteSharedKBFile = async (kbId, fileId) => {
+  const res = await request(`${API_BASE}/api/shared-kb/${kbId}/files/${fileId}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('删除文件失败')
+}
+
+// ── 个人知识库 ──────────────────────────────────────────────
+
+export const fetchKnowledgeBases = async ({ skip = 0, limit = 100 } = {}) => {
+  const res = await request(
+    `${API_BASE}/api/knowledge-bases?skip=${skip}&limit=${limit}`,
+    { headers: authHeaders() }
+  )
+  if (!res.ok) throw new Error('获取知识库列表失败')
+  return res.json()
+}
+
+export const createKnowledgeBase = async (data) => {
+  const res = await request(`${API_BASE}/api/knowledge-bases`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '创建失败' }))
+    throw new Error(err.detail || '创建知识库失败')
+  }
+  return res.json()
+}
+
+export const getKnowledgeBase = async (kbId) => {
+  const res = await request(`${API_BASE}/api/knowledge-bases/${kbId}`, {
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('获取知识库详情失败')
+  return res.json()
+}
+
+export const updateKnowledgeBase = async (kbId, data) => {
+  const res = await request(`${API_BASE}/api/knowledge-bases/${kbId}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '更新失败' }))
+    throw new Error(err.detail || '更新知识库失败')
+  }
+  return res.json()
+}
+
+export const deleteKnowledgeBase = async (kbId) => {
+  const res = await request(`${API_BASE}/api/knowledge-bases/${kbId}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('删除知识库失败')
+}
+
+export const uploadToKnowledgeBase = async (kbId, file, strategyMode = 'auto', chunkSize = null, chunkOverlap = null, topK = null, scoreThreshold = null) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('strategy_mode', strategyMode)
+  
+  if (strategyMode === 'manual') {
+    if (chunkSize) formData.append('chunk_size', chunkSize)
+    if (chunkOverlap) formData.append('chunk_overlap', chunkOverlap)
+    if (topK) formData.append('top_k', topK)
+    if (scoreThreshold) formData.append('score_threshold', scoreThreshold)
+  }
+
+  const res = await request(`${API_BASE}/api/knowledge-bases/${kbId}/upload`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${localStorage.getItem('corvusNoteToken') || ''}`,

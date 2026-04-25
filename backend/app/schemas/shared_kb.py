@@ -61,3 +61,25 @@ class SharedKBMember(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SharedKBFile(BaseModel):
+    id: str
+    kb_id: str
+    name: str
+    file_size: int
+    file_type: str
+    uploader_id: str
+    uploader_name: str
+    indexed: bool = False
+    uploaded_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class SharedKBFileContent(BaseModel):
+    id: str
+    name: str
+    file_type: str
+    content: str  # 提取后的纯文本（用于前端预览）

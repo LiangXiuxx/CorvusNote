@@ -105,6 +105,11 @@ const AppContent = () => {
     setCurrentNoteId(null)
 
     const loadData = async () => {
+      // 游客用户不加载后端数据
+      if (user.isGuest) {
+        return
+      }
+
       // ── 加载对话列表 ──────────────────────────────────────────
       try {
         const convs = await fetchConversations()
@@ -131,7 +136,8 @@ const AppContent = () => {
           })))
         }
       } catch (err) {
-              }
+        console.error('加载对话失败:', err)
+      }
 
       // ── 加载笔记列表 ──────────────────────────────────────────
       try {
@@ -140,6 +146,7 @@ const AppContent = () => {
           id: n.id,
           title: n.title,
           content: n.content,
+          images: n.images || {},
           createdAt: n.created_at,
           updatedAt: n.updated_at,
         }))
@@ -150,7 +157,8 @@ const AppContent = () => {
           setCurrentNoteId(savedNoteId)
         }
       } catch (err) {
-              }
+        console.error('加载笔记失败:', err)
+      }
     }
 
     loadData()
@@ -172,21 +180,53 @@ const AppContent = () => {
     }
 
     try {
-      const conv = await createConversation(title)
-      const newConversation = {
-        id: conv.id,
-        title: conv.title,
-        createdAt: conv.created_at,
-        updatedAt: conv.updated_at,
+      // 游客用户使用本地会话管理
+      if (user.isGuest) {
+        const newConversation = {
+          id: 'guest_conv_' + Date.now(),
+          title: title,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        setConversations(prev => [newConversation, ...prev])
+        setCurrentConversationId(newConversation.id)
+        localStorage.setItem(`corvusNoteCurrentConversationId_${user.id}`, newConversation.id)
+        setMessages([])
+        setIsChatting(true)
+        return newConversation.id
+      } else {
+        // 普通用户调用后端API
+        const conv = await createConversation(title)
+        const newConversation = {
+          id: conv.id,
+          title: conv.title,
+          createdAt: conv.created_at,
+          updatedAt: conv.updated_at,
+        }
+        setConversations(prev => [newConversation, ...prev])
+        setCurrentConversationId(conv.id)
+        localStorage.setItem(`corvusNoteCurrentConversationId_${user.id}`, conv.id)
+        setMessages([])
+        setIsChatting(true)
+        return conv.id
       }
-      setConversations(prev => [newConversation, ...prev])
-      setCurrentConversationId(conv.id)
-      localStorage.setItem(`corvusNoteCurrentConversationId_${user.id}`, conv.id)
-      setMessages([])
-      setIsChatting(true)
-      return conv.id
     } catch (err) {
-            return null
+      // 对于游客用户，即使API调用失败也继续使用本地会话
+      if (user.isGuest) {
+        const newConversation = {
+          id: 'guest_conv_' + Date.now(),
+          title: title,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        setConversations(prev => [newConversation, ...prev])
+        setCurrentConversationId(newConversation.id)
+        localStorage.setItem(`corvusNoteCurrentConversationId_${user.id}`, newConversation.id)
+        setMessages([])
+        setIsChatting(true)
+        return newConversation.id
+      }
+      return null
     }
   }
   
@@ -197,16 +237,19 @@ const AppContent = () => {
     setMessages([])
     setIsChatting(true)
 
-    try {
-      const msgs = await fetchMessages(conversationId)
-      setMessages(msgs.map(m => ({
-        role: m.role,
-        content: m.content,
-        file: m.file || null,
-        mountedKnowledgeBases: m.mounted_knowledge_bases || [],
-      })))
-    } catch (err) {
-          }
+    // 游客用户不需要从后端加载消息
+    if (!user.isGuest) {
+      try {
+        const msgs = await fetchMessages(conversationId)
+        setMessages(msgs.map(m => ({
+          role: m.role,
+          content: m.content,
+          file: m.file || null,
+          mountedKnowledgeBases: m.mounted_knowledge_bases || [],
+        })))
+      } catch (err) {
+            }
+    }
   }
   
   // 编辑会话标题：同步到后端
@@ -216,10 +259,13 @@ const AppContent = () => {
         ? { ...conv, title: newTitle, updatedAt: new Date().toISOString() }
         : conv
     ))
-    try {
-      await updateConversation(conversationId, newTitle)
-    } catch (err) {
-          }
+    // 游客用户不需要同步到后端
+    if (!user.isGuest) {
+      try {
+        await updateConversation(conversationId, newTitle)
+      } catch (err) {
+            }
+    }
   }
 
   // 删除会话：同步到后端（后端自动级联删除消息）
@@ -238,10 +284,13 @@ const AppContent = () => {
 
     setConversations(prev => prev.filter(conv => conv.id !== conversationId))
 
-    try {
-      await deleteConversationApi(conversationId)
-    } catch (err) {
-          }
+    // 游客用户不需要同步到后端
+    if (!user.isGuest) {
+      try {
+        await deleteConversationApi(conversationId)
+      } catch (err) {
+            }
+    }
   }
   
   // 笔记相关函数
@@ -381,28 +430,31 @@ const AppContent = () => {
         return files
       }
 
-      // 流式完成后，持久化消息
-      let allMountedItems = []
-      for (const item of (mountedKnowledgeBases || [])) {
-        if (item.type === 'folder') {
-          allMountedItems.push(...getAllFilesFromFolder([item]))
-        } else {
-          allMountedItems.push(item)
-        }
-      }
-      const kbIds = allMountedItems.filter(kb => kb.backendId).map(kb => kb.backendId)
-      const fileMeta = file ? { name: file.name, type: file.type, size: file.size } : null
-      await saveMessage(newConvId, { role: 'user', content: userDisplayContent, file: fileMeta, mounted_knowledge_bases: kbIds })
-      await saveMessage(newConvId, { role: 'assistant', content: finalContent || '' })
-
-      // 用 AI 生成对话标题（异步，不阻塞 UI）
-      if (finalContent) {
-        generateConversationTitle(question, finalContent).then(async (title) => {
-          if (title) {
-            await updateConversation(newConvId, title)
-            setConversations(prev => prev.map(c => c.id === newConvId ? { ...c, title } : c))
+      // 非游客用户才持久化消息到后端
+      if (!user.isGuest) {
+        // 流式完成后，持久化消息
+        let allMountedItems = []
+        for (const item of (mountedKnowledgeBases || [])) {
+          if (item.type === 'folder') {
+            allMountedItems.push(...getAllFilesFromFolder([item]))
+          } else {
+            allMountedItems.push(item)
           }
-        }).catch(() => {})
+        }
+        const kbIds = allMountedItems.filter(kb => kb.backendId).map(kb => kb.backendId)
+        const fileMeta = file ? { name: file.name, type: file.type, size: file.size } : null
+        await saveMessage(newConvId, { role: 'user', content: userDisplayContent, file: fileMeta, mounted_knowledge_bases: kbIds })
+        await saveMessage(newConvId, { role: 'assistant', content: finalContent || '' })
+
+        // 用 AI 生成对话标题（异步，不阻塞 UI）
+        if (finalContent) {
+          generateConversationTitle(question, finalContent).then(async (title) => {
+            if (title) {
+              await updateConversation(newConvId, title)
+              setConversations(prev => prev.map(c => c.id === newConvId ? { ...c, title } : c))
+            }
+          }).catch(() => {})
+        }
       }
     } catch (error) {
       setIsGenerating(false)
@@ -422,12 +474,14 @@ const AppContent = () => {
     if (action === 'register') {
       setShowRegister(true)
     } else if (action === 'guest') {
+      // 游客登录：先设置用户，后关闭登录页面
       loginAsGuest()
-      setShowRegister(false)
+      setIsChatting(true)
     } else {
-      // 登录成功后会自动设置用户状态
-      setShowRegister(false)
+      setIsChatting(true)
     }
+    // 无论哪种登录，都关闭登录页面
+    setShowRegister(false)
   }
 
   const handleRegister = (userData) => {

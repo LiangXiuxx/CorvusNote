@@ -6,8 +6,10 @@ class NoteModel:
     def __init__(self):
         self.db = get_db()
         self.collection: Collection = self.db["notes"]
-    
+
     def create(self, note_data: dict) -> dict:
+        if "images" not in note_data:
+            note_data["images"] = {}
         result = self.collection.insert_one(note_data)
         return self.collection.find_one({"_id": result.inserted_id})
     

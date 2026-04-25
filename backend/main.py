@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import logging
 import os
 from datetime import datetime, timedelta
 from pymongo import ASCENDING, DESCENDING
@@ -8,6 +9,15 @@ from bson.objectid import ObjectId
 from app.core.config import settings
 from app.core.database import get_db, close_db
 from app.api import auth, users, conversations, messages, notes, knowledge_bases, chat, shared_kb
+
+# ── 审计日志配置 ───────────────────────────────────────────────
+# 管理员高权限操作写入独立审计日志文件，便于事后追溯
+_audit_handler = logging.FileHandler("audit.log", encoding="utf-8")
+_audit_handler.setFormatter(logging.Formatter("%(asctime)s [AUDIT] %(message)s"))
+audit_logger = logging.getLogger("audit")
+audit_logger.setLevel(logging.INFO)
+audit_logger.addHandler(_audit_handler)
+audit_logger.addHandler(logging.StreamHandler())  # 同时输出到控制台
 
 # 确保上传目录和向量存储目录存在
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
@@ -37,6 +47,21 @@ def _ensure_indexes(db) -> None:
     # knowledge_bases：按用户查询
     db["knowledge_bases"].create_index(
         [("user_id", ASCENDING), ("created_at", DESCENDING)], background=True
+    )
+
+    # shared_knowledge_bases：按创建者查询
+    db["shared_knowledge_bases"].create_index(
+        [("owner_id", ASCENDING), ("created_at", DESCENDING)], background=True
+    )
+
+    # shared_kb_members：按知识库和用户查询（成员检查）
+    db["shared_kb_members"].create_index(
+        [("kb_id", ASCENDING), ("user_id", ASCENDING)], unique=True, background=True
+    )
+
+    # shared_kb_files：按知识库查询文件列表，并按上传时间升序排列
+    db["shared_kb_files"].create_index(
+        [("kb_id", ASCENDING), ("uploaded_at", ASCENDING)], background=True
     )
 
     print("[DB] 索引检查完成")
@@ -111,10 +136,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# 配置CORS
+# 配置 CORS — 精确匹配来源，不允许通配符 *（否则 credentials 会被浏览器拒绝）
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 生产环境应设置具体域名
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
