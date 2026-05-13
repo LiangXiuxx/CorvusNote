@@ -68,7 +68,8 @@ function NotesPage({ user, onLogout, onShowSettings, onBackToHome, notes, curren
     } else {
       setImageMap({})
     }
-  }, [currentNoteId, currentNote])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentNoteId])
 
   // 当 imageMap 变化时，同步到后端
   useEffect(() => {
@@ -596,10 +597,10 @@ function NotesPage({ user, onLogout, onShowSettings, onBackToHome, notes, curren
             <div className="user-info">
               <img
                 src={user.avatar}
-                alt={user.username}
+                alt={user.nickname || user.username}
                 className="user-avatar"
               />
-              <span className="username">{user.username}</span>
+              <span className="username">{user.nickname || user.username}</span>
             </div>
           </div>
         </div>

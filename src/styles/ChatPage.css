@@ -1667,6 +1667,17 @@
   transform: none;
 }
 
+/* 游客锁定状态 */
+.response-action-btn.btn-locked {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(60%);
+}
+.response-action-btn.btn-locked:hover {
+  background-color: transparent;
+  transform: none;
+}
+
 /* 加载状态样式 */
 .loading-spinner {
   font-size: 12px;

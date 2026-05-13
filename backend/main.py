@@ -8,7 +8,7 @@ from pymongo import ASCENDING, DESCENDING
 from bson.objectid import ObjectId
 from app.core.config import settings
 from app.core.database import get_db, close_db
-from app.api import auth, users, conversations, messages, notes, knowledge_bases, chat, shared_kb
+from app.api import auth, users, conversations, messages, notes, knowledge_bases, chat, shared_kb, admin
 
 # ── 审计日志配置 ───────────────────────────────────────────────
 # 管理员高权限操作写入独立审计日志文件，便于事后追溯
@@ -26,8 +26,21 @@ os.makedirs(settings.VECTOR_STORE_DIR, exist_ok=True)
 
 def _ensure_indexes(db) -> None:
     """创建必要的 MongoDB 索引，幂等操作（已存在时静默跳过）。"""
-    # users：用户名唯一索引，加速登录/注册查重
-    db["users"].create_index("username", unique=True, background=True)
+    from pymongo.errors import DuplicateKeyError, OperationFailure
+
+    try:
+        # users：用户名唯一索引，加速登录/注册查重
+        # dropDups=False 是默认行为，有重复数据时索引创建会失败
+        db["users"].create_index("username", unique=True, background=True)
+        print("[DB] 用户表 username 唯一索引已就绪")
+    except DuplicateKeyError:
+        # 如果已存在重复 username 数据，索引创建会失败
+        # 打印严重警告，管理员需要手动清理重复数据
+        print("[DB] ⚠️  严重错误：users 表中存在重复 username！")
+        print("[DB] ⚠️  请手动清理重复数据后重启服务")
+        # 不阻止服务启动，但后续业务层需做应用级查重
+    except OperationFailure as e:
+        print(f"[DB] ⚠️  索引创建失败（可忽略，后续可能重试）: {e}")
 
     # conversations：按用户 + 更新时间查询（侧边栏排序）
     db["conversations"].create_index(
@@ -121,14 +134,40 @@ async def lifespan(app: FastAPI):
     if not user_model.get_by_username("admin"):
         user_model.create({
             "username": "admin",
+            "nickname": "Admin",
             "password_hash": get_password_hash("admin123"),
             "is_admin": True,
             "is_guest": False,
             "avatar": "https://ui-avatars.com/api/?name=Admin&background=random&color=fff",
+            "avatar_color": "#1677ff",
+            "status": "active",
+            "token_version": 1,
+            "last_login_at": None,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
         })
         print("[Init] Admin 账号已创建：admin / admin123（请尽快修改密码）")
+
+    # 4. 迁移旧用户：补充新字段（token_version、nickname、status、avatar_color）
+    import re as _re
+    migration_count = 0
+    for old_user in user_model.collection.find({"token_version": {"$exists": False}}):
+        avatar_url = old_user.get("avatar", "")
+        color_match = _re.search(r'background=([0-9a-fA-F]{6})', avatar_url)
+        avatar_color = f"#{color_match.group(1)}" if color_match else "#1677ff"
+        user_model.collection.update_one(
+            {"_id": old_user["_id"]},
+            {"$set": {
+                "token_version": 1,
+                "nickname": old_user.get("username", ""),
+                "status": "active",
+                "avatar_color": avatar_color,
+                "last_login_at": None,
+            }}
+        )
+        migration_count += 1
+    if migration_count:
+        print(f"[Migration] 已迁移 {migration_count} 个旧用户，补充 token_version 等字段")
 
     yield
     # ── 关闭时清理 ────────────────────────────────────────────────
@@ -154,6 +193,7 @@ app.include_router(notes.router)
 app.include_router(knowledge_bases.router)
 app.include_router(chat.router)
 app.include_router(shared_kb.router)
+app.include_router(admin.router)
 
 @app.get("/")
 async def root():

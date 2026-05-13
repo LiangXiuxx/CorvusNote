@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./uploads"
     VECTOR_STORE_DIR: str = "./vector_stores"
     DASHSCOPE_API_KEY: str = ""
+    MIMO_API_KEY: str = ""
 
     @property
     def allowed_origins_list(self) -> list[str]:

@@ -18,6 +18,9 @@ from app.core.config import settings
 # DashScope OpenAI 兼容端点
 DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
+# 小米 MiMo 端点
+MIMO_BASE_URL = "https://token-plan-cn.xiaomimimo.com/v1"
+
 # 保留最近 N 轮历史，避免超出 context window
 MAX_HISTORY_TURNS = 10
 
@@ -78,11 +81,18 @@ async def chat_stream(
 
     openai_messages.append({"role": "user", "content": message})
 
-    # ── Step 3: 创建 AsyncOpenAI 客户端 ──────────────────────────
-    client = AsyncOpenAI(
-        api_key=settings.DASHSCOPE_API_KEY,
-        base_url=DASHSCOPE_BASE_URL,
-    )
+    # ── Step 3: 创建 AsyncOpenAI 客户端（按 provider 路由，大小写不敏感）
+    if model.lower().startswith("mimo-"):
+        model = model.lower()   # 规范化为小写，MiMo API 只接受小写 ID
+        client = AsyncOpenAI(
+            api_key=settings.MIMO_API_KEY,
+            base_url=MIMO_BASE_URL,
+        )
+    else:
+        client = AsyncOpenAI(
+            api_key=settings.DASHSCOPE_API_KEY,
+            base_url=DASHSCOPE_BASE_URL,
+        )
 
     # ── Step 4: 流式调用 ───────────────────────────────
     response = await client.chat.completions.create(

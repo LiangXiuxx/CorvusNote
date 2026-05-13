@@ -5,20 +5,28 @@ from bson.objectid import ObjectId
 
 class UserBase(BaseModel):
     username: str
+    nickname: Optional[str] = ""
     is_admin: Optional[bool] = False
     is_guest: Optional[bool] = False
     avatar: Optional[str] = ""
+    avatar_color: Optional[str] = ""
+    status: Optional[str] = "active"
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    username: str
     password: str
+    avatar: Optional[str] = ""
 
 class UserUpdate(BaseModel):
-    username: Optional[str] = None
+    nickname: Optional[str] = None
     password: Optional[str] = None
     avatar: Optional[str] = None
+    avatar_color: Optional[str] = None
 
 class User(UserBase):
     id: str
+    token_version: Optional[int] = 0
+    last_login_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 

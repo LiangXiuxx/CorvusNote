@@ -49,6 +49,13 @@ async def stream_chat(
        - 无知识库           → 直接调用 LLM
     3. DashScope SSE 流式输出
     """
+    # 游客不允许挂载知识库（RAG 为注册用户专属功能）
+    if current_user.get("is_guest") and request.kb_ids:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="知识库问答功能仅对注册用户开放，请注册后使用",
+        )
+
     kb_mounted = len(request.kb_ids) > 0
     context = ""
 
@@ -118,6 +125,13 @@ async def invoke_chat(
     非流式调用接口 — 用于思维导图等需要完整响应的场景
     收集 SSE 流的所有内容后一次性返回
     """
+    # 思维导图生成为注册用户专属功能
+    if current_user.get("is_guest"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="思维导图功能仅对注册用户开放，请注册后使用",
+        )
+
     full_content = ""
     full_reasoning = ""
 

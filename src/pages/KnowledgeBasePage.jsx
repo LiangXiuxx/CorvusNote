@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import mammoth from 'mammoth'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import '../styles/KnowledgeBasePage.css'
 import {
   fetchKnowledgeBases, createKnowledgeBase, deleteKnowledgeBase, uploadToKnowledgeBase,
@@ -92,8 +94,10 @@ function KnowledgeBasePage({ user, onLogout, onShowSettings, onBackToHome, onNav
         return JSON.parse(savedData)
       }
     }
-    // 默认数据
-    return [
+    return []
+    // NOTE: 原始演示条目（id:'3' Corvus Note使用指南）已移除。
+    // 该条目无对应后端文件，点击时触发"获取文件失败"，已删除。
+    const _unused = [
       {
         id: '3',
         name: 'Corvus Note使用指南',
@@ -322,6 +326,9 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
   // 菜单状态管理
   const [activeMenuId, setActiveMenuId] = useState(null)
   const [activeMenuPosition, setActiveMenuPosition] = useState({ x: 0, y: 0 })
+  // 共享知识库文件菜单
+  const [sharedFileMenuId, setSharedFileMenuId] = useState(null)
+  const [sharedFileMenuPos, setSharedFileMenuPos] = useState({ x: 0, y: 0 })
   // 侧边栏折叠状态
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   // 个人知识库折叠状态
@@ -622,6 +629,12 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
     // 检查是否在共享知识库模式下且未选择知识库
     if (activeView === 'shared' && !selectedSharedKnowledgeBase) {
       alert('请先选择一个共享知识库')
+      return
+    }
+
+    // 限制嵌套深度：最多 1 层子文件夹
+    if (currentPath.length >= 2) {
+      alert('文件夹最多嵌套一层，无法继续新建子文件夹。\n请返回上级目录后再操作。')
       return
     }
 
@@ -1078,6 +1091,7 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
   React.useEffect(() => {
     const handleClickOutside = () => {
       setActiveMenuId(null)
+      setSharedFileMenuId(null)
     }
 
     document.addEventListener('click', handleClickOutside)
@@ -1330,7 +1344,7 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
         <div className="page-header">
           <div className="header-left">
             <h1 className="page-title">
-              {activeView === 'personal' ? '个人知识库' : '发现'}
+              {activeView === 'personal' ? '个人知识库' : '共享知识库'}
             </h1>
           </div>
           <div className="page-actions">
@@ -1338,10 +1352,10 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
             <div className="user-info">
               <img
                 src={user.avatar}
-                alt={user.username}
+                alt={user.nickname || user.username}
                 className="user-avatar"
               />
-              <span className="username">{user.username}</span>
+              <span className="username">{user.nickname || user.username}</span>
             </div>
           </div>
         </div>
@@ -1350,81 +1364,69 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
         {activeView === 'personal' ? (
           /* 个人知识库内容 */
           <div className="folder-structure">
-            {/* 面包屑导航 */}
-            <div className="breadcrumb">
-              {activeView === 'personal' ? (
-                <>
-                  <span
-                    className="breadcrumb-item"
-                    onClick={() => {
-                      setCurrentPath([])
-                      setSelectedFolder(null)
-                      setCurrentFolderContent(personalKnowledgeBaseItems)
-                    }}
-                  >
-                    个人知识库
-                  </span>
-                  {currentPath.map((folderId, index) => {
-                    const folder = findFolderById(personalKnowledgeBaseItems, folderId)
-                    return (
-                      <>
-                        <span className="breadcrumb-separator">/</span>
-                        <span
-                          key={folderId}
-                          className="breadcrumb-item"
-                          onClick={() => {
-                            const newPath = currentPath.slice(0, index + 1)
-                            setCurrentPath(newPath)
-                            setSelectedFolder(folderId)
-                            const folder = findFolderById(personalKnowledgeBaseItems, folderId)
-                            setCurrentFolderContent(folder.items || [])
-                          }}
-                        >
-                          {folder?.name || '未知文件夹'}
-                        </span>
-                      </>
-                    )
-                  })}
-                </>
-              ) : (
-                <span className="breadcrumb-item">共享知识库</span>
-              )}
+            {/* 工具栏：面包屑 + 操作按钮同行 */}
+            <div className="kb-toolbar">
+              <div className="breadcrumb">
+                <span
+                  className="breadcrumb-item"
+                  onClick={() => {
+                    setCurrentPath([])
+                    setSelectedFolder(null)
+                    setCurrentFolderContent(personalKnowledgeBaseItems)
+                  }}
+                >
+                  个人知识库
+                </span>
+                {currentPath.map((folderId, index) => {
+                  const folder = findFolderById(personalKnowledgeBaseItems, folderId)
+                  return (
+                    <React.Fragment key={folderId}>
+                      <span className="breadcrumb-separator">/</span>
+                      <span
+                        className="breadcrumb-item"
+                        onClick={() => {
+                          const newPath = currentPath.slice(0, index + 1)
+                          setCurrentPath(newPath)
+                          setSelectedFolder(folderId)
+                          const f = findFolderById(personalKnowledgeBaseItems, folderId)
+                          setCurrentFolderContent(f?.items || [])
+                        }}
+                      >
+                        {folder?.name || '未知文件夹'}
+                      </span>
+                    </React.Fragment>
+                  )
+                })}
+              </div>
+              <div className="section-actions">
+                <div className="action-btn" onClick={handleCreateFolder}>
+                  <span className="action-icon">
+                    <svg t="1770884310333" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6319" width="15" height="15"><path d="M896 967.111111h-768C57.315556 967.111111 0 908.885333 0 837.091556V186.88C0 115.114667 57.315556 56.888889 128 56.888889h183.466667A127.857778 127.857778 0 0 1 426.666667 130.56l26.453333 56.348444H896c70.684444 0 128 58.225778 128 130.048v520.135112C1024 908.885333 966.684444 967.111111 896 967.111111zM85.333333 437.447111v399.644445c0 23.921778 19.114667 43.320889 42.666667 43.320888h768c23.552 0 42.666667-19.399111 42.666667-43.320888v-399.644445H85.333333z m0-86.698667h853.333334v-33.792c0-23.950222-19.114667-43.349333-42.666667-43.349333H426.666667a42.609778 42.609778 0 0 1-38.4-24.718222l-37.973334-80.611556a42.609778 42.609778 0 0 0-38.826666-24.689777H128c-23.552 0-42.666667 19.399111-42.666667 43.320888v163.84z" fill="#000000" p-id="6320"></path></svg>
+                  </span> 新建文件夹
+                </div>
+                <label className="action-btn upload-btn">
+                  <span className="action-icon">
+                    <svg t="1770884351475" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6472" width="15" height="15"><path d="M924.444444 1024h-796.444444C73.016889 1024 28.444444 978.147556 28.444444 921.6v-117.020444c0-24.234667 19.114667-43.889778 42.666667-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 8.078222 6.371556 14.620444 14.222222 14.620444h796.444444c7.850667 0 14.222222-6.542222 14.222223-14.620444v-117.020444c0-24.234667 19.114667-43.889778 42.666666-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 56.547556-44.572444 102.4-99.555556 102.4z m-398.222222-948.821333c11.406222 0 22.357333 4.721778 30.378667 13.084444 8.021333 8.334222 12.430222 19.655111 12.288 31.402667v585.130666c0 24.234667-19.114667 43.889778-42.666667 43.889778s-42.666667-19.626667-42.666666-43.889778V119.665778c-0.142222-11.747556 4.266667-23.04 12.288-31.402667a42.097778 42.097778 0 0 1 30.378666-13.084444zM526.222222 0a42.382222 42.382222 0 0 1 30.151111 12.885333l284.444445 292.551111c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.840889-12.600889 31.004444a42.097778 42.097778 0 0 1-60.302222 0l-284.444445-292.551111a44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.812444 12.600889-31.004445A42.382222 42.382222 0 0 1 526.222222 0z m0 0a42.382222 42.382222 0 0 1 30.151111 12.885333c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.812444-12.600889 31.004444l-284.444444 292.579556a42.097778 42.097778 0 0 1-60.302222 0 44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.840889 12.600889-31.004444l284.444444-292.579556A42.382222 42.382222 0 0 1 526.222222 0z" fill="#000000" p-id="6473"></path></svg>
+                  </span> 上传文件
+                  <input
+                    type="file"
+                    className="file-input"
+                    multiple
+                    accept=".txt,.md,.markdown,.pdf,.docx"
+                    onChange={handleFileUpload}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* 格式提示 */}
+            <div className="format-hint-bar">
+              <span className="format-hint-text">
+                支持格式：<strong>PDF</strong> · <strong>Word</strong>（.docx）· <strong>TXT</strong> · <strong>Markdown</strong>（.md）&nbsp;· 单文件最大 20 MB &nbsp;· 上传后自动建立向量索引
+              </span>
             </div>
 
             <div className="folder-section">
-              <div className="section-header">
-                <div className="section-title-wrapper">
-                  {currentPath.length > 0 && (
-                    <div className="section-title">
-                      {selectedFolder ?
-                        findFolderById(activeView === 'personal' ? personalKnowledgeBaseItems : sharedKnowledgeBaseItems, selectedFolder)?.name || (activeView === 'personal' ? '个人知识库' : '共享知识库') :
-                        (activeView === 'personal' ? '个人知识库' : '共享知识库')}
-                    </div>
-                  )}
-                </div>
-                {activeView === 'personal' && (
-                  <div className="section-actions">
-                    {/* 新建文件夹按钮 */}
-                    <div className="action-btn" onClick={handleCreateFolder}>
-                      <span className="action-icon">
-                        <svg t="1770884310333" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6319" width="16" height="16"><path d="M896 967.111111h-768C57.315556 967.111111 0 908.885333 0 837.091556V186.88C0 115.114667 57.315556 56.888889 128 56.888889h183.466667A127.857778 127.857778 0 0 1 426.666667 130.56l26.453333 56.348444H896c70.684444 0 128 58.225778 128 130.048v520.135112C1024 908.885333 966.684444 967.111111 896 967.111111zM85.333333 437.447111v399.644445c0 23.921778 19.114667 43.320889 42.666667 43.320888h768c23.552 0 42.666667-19.399111 42.666667-43.320888v-399.644445H85.333333z m0-86.698667h853.333334v-33.792c0-23.950222-19.114667-43.349333-42.666667-43.349333H426.666667a42.609778 42.609778 0 0 1-38.4-24.718222l-37.973334-80.611556a42.609778 42.609778 0 0 0-38.826666-24.689777H128c-23.552 0-42.666667 19.399111-42.666667 43.320888v163.84z" fill="#000000" p-id="6320"></path></svg>
-                      </span> 新建文件夹
-                    </div>
-                    {/* 上传文件按钮 */}
-                    <label className="action-btn upload-btn">
-                      <span className="action-icon">
-                        <svg t="1770884351475" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6472" width="16" height="16"><path d="M924.444444 1024h-796.444444C73.016889 1024 28.444444 978.147556 28.444444 921.6v-117.020444c0-24.234667 19.114667-43.889778 42.666667-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 8.078222 6.371556 14.620444 14.222222 14.620444h796.444444c7.850667 0 14.222222-6.542222 14.222223-14.620444v-117.020444c0-24.234667 19.114667-43.889778 42.666666-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 56.547556-44.572444 102.4-99.555556 102.4z m-398.222222-948.821333c11.406222 0 22.357333 4.721778 30.378667 13.084444 8.021333 8.334222 12.430222 19.655111 12.288 31.402667v585.130666c0 24.234667-19.114667 43.889778-42.666667 43.889778s-42.666667-19.626667-42.666666-43.889778V119.665778c-0.142222-11.747556 4.266667-23.04 12.288-31.402667a42.097778 42.097778 0 0 1 30.378666-13.084444zM526.222222 0a42.382222 42.382222 0 0 1 30.151111 12.885333l284.444445 292.551111c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.840889-12.600889 31.004444a42.097778 42.097778 0 0 1-60.302222 0l-284.444445-292.551111a44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.812444 12.600889-31.004445A42.382222 42.382222 0 0 1 526.222222 0z m0 0a42.382222 42.382222 0 0 1 30.151111 12.885333c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.812444-12.600889 31.004444l-284.444444 292.579556a42.097778 42.097778 0 0 1-60.302222 0 44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.840889 12.600889-31.004444l284.444444-292.579556A42.382222 42.382222 0 0 1 526.222222 0z" fill="#000000" p-id="6473"></path></svg>
-                      </span> 上传文件
-                      <input
-                        type="file"
-                        className="file-input"
-                        multiple
-                        onChange={handleFileUpload}
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
               <div className="folder-items">
                 {/* 现有文件夹和文件 */}
                 {currentFolderContent.length > 0 ? (
@@ -1482,10 +1484,29 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
         ) : (
           /* 共享知识库详情 - API 驱动 */
           <div className="folder-structure">
-            <div className="breadcrumb">
-              <span className="breadcrumb-item">
-                共享知识库{selectedSharedKB ? ` / ${selectedSharedKB.name}` : ''}
-              </span>
+            {/* 工具栏：面包屑 + 操作按钮同行 */}
+            <div className="kb-toolbar">
+              <div className="breadcrumb">
+                <span className="breadcrumb-item">
+                  共享知识库{selectedSharedKB ? ` / ${selectedSharedKB.name}` : ''}
+                </span>
+              </div>
+              {selectedSharedKB && (
+                <div className="section-actions">
+                  <label className="action-btn upload-btn" style={{ opacity: sharedUploading ? 0.6 : 1, cursor: sharedUploading ? 'wait' : 'pointer' }}>
+                    <span className="action-icon">
+                      <svg t="1770884351475" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6472" width="15" height="15"><path d="M924.444444 1024h-796.444444C73.016889 1024 28.444444 978.147556 28.444444 921.6v-117.020444c0-24.234667 19.114667-43.889778 42.666667-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 8.078222 6.371556 14.620444 14.222222 14.620444h796.444444c7.850667 0 14.222222-6.542222 14.222223-14.620444v-117.020444c0-24.234667 19.114667-43.889778 42.666666-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 56.547556-44.572444 102.4-99.555556 102.4z m-398.222222-948.821333c11.406222 0 22.357333 4.721778 30.378667 13.084444 8.021333 8.334222 12.430222 19.655111 12.288 31.402667v585.130666c0 24.234667-19.114667 43.889778-42.666667 43.889778s-42.666667-19.626667-42.666666-43.889778V119.665778c-0.142222-11.747556 4.266667-23.04 12.288-31.402667a42.097778 42.097778 0 0 1 30.378666-13.084444zM526.222222 0a42.382222 42.382222 0 0 1 30.151111 12.885333l284.444445 292.551111c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.840889-12.600889 31.004444a42.097778 42.097778 0 0 1-60.302222 0l-284.444445-292.551111a44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.812444 12.600889-31.004445A42.382222 42.382222 0 0 1 526.222222 0z m0 0a42.382222 42.382222 0 0 1 30.151111 12.885333c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.812444-12.600889 31.004444l-284.444444 292.579556a42.097778 42.097778 0 0 1-60.302222 0 44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.840889 12.600889-31.004444l284.444444-292.579556A42.382222 42.382222 0 0 1 526.222222 0z" fill="#000000" p-id="6473"></path></svg>
+                    </span>
+                    {sharedUploading ? '上传中…' : '上传文件'}
+                    <input type="file" className="file-input" accept=".txt,.md,.markdown,.pdf,.docx" onChange={handleSharedUpload} disabled={sharedUploading} />
+                  </label>
+                  {selectedSharedKB.owner_id === user?.id ? (
+                    <div className="action-btn action-btn-danger" onClick={handleSharedDeleteKB}>删除知识库</div>
+                  ) : (
+                    <div className="action-btn" onClick={handleSharedQuitKB}>退出知识库</div>
+                  )}
+                </div>
+              )}
             </div>
 
             {sharedKBLoading ? (
@@ -1495,76 +1516,68 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
               </div>
             ) : selectedSharedKB ? (
               <>
-                {/* KB 信息头部 */}
-                <div style={{ padding: '16px 24px', borderBottom: '1px solid #f0f0f0', background: '#fafafa' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                    {selectedSharedKB.cover ? (
-                      <img src={selectedSharedKB.cover} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
-                    ) : (
-                      <div style={{ width: 52, height: 52, borderRadius: 8, flexShrink: 0, background: `hsl(${(selectedSharedKB.name?.charCodeAt(0)||0)*137%360},55%,55%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 22, fontWeight: 700 }}>
-                        {selectedSharedKB.name?.[0]}
-                      </div>
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <span style={{ fontSize: 16, fontWeight: 600, color: '#222' }}>{selectedSharedKB.name}</span>
-                        <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 4, background: selectedSharedKB.is_public ? '#e6f4ff' : '#f5f5f5', color: selectedSharedKB.is_public ? '#1890ff' : '#999' }}>
-                          {selectedSharedKB.is_public ? '公开' : '私有'}
-                        </span>
-                        <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 4, background: '#f0f5ff', color: '#597ef7' }}>{selectedSharedKB.category}</span>
-                      </div>
-                      <p style={{ margin: '0 0 6px', fontSize: 12, color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {selectedSharedKB.description || '暂无简介'}
-                      </p>
-                      <div style={{ display: 'flex', gap: 14, fontSize: 12, color: '#999' }}>
-                        <span>@{selectedSharedKB.owner_name}</span>
-                        <span>{selectedSharedKB.member_count ?? 0} 成员</span>
-                        <span>{selectedSharedKB.file_count ?? 0} 个文件</span>
-                      </div>
+                {/* KB 信息头部（简洁版）*/}
+                <div className="shared-kb-info">
+                  {selectedSharedKB.cover ? (
+                    <img src={selectedSharedKB.cover} alt="" className="shared-kb-avatar" />
+                  ) : (
+                    <div className="shared-kb-avatar" style={{ background: `hsl(${(selectedSharedKB.name?.charCodeAt(0)||0)*137%360},45%,50%)`, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700 }}>
+                      {selectedSharedKB.name?.[0]}
                     </div>
-                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                      <label className="action-btn upload-btn" style={{ cursor: sharedUploading ? 'wait' : 'pointer', opacity: sharedUploading ? 0.6 : 1 }}>
-                        <span className="action-icon">
-                          <svg t="1770884351475" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6472" width="16" height="16"><path d="M924.444444 1024h-796.444444C73.016889 1024 28.444444 978.147556 28.444444 921.6v-117.020444c0-24.234667 19.114667-43.889778 42.666667-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 8.078222 6.371556 14.620444 14.222222 14.620444h796.444444c7.850667 0 14.222222-6.542222 14.222223-14.620444v-117.020444c0-24.234667 19.114667-43.889778 42.666666-43.889778s42.666667 19.626667 42.666667 43.889778V921.6c0 56.547556-44.572444 102.4-99.555556 102.4z m-398.222222-948.821333c11.406222 0 22.357333 4.721778 30.378667 13.084444 8.021333 8.334222 12.430222 19.655111 12.288 31.402667v585.130666c0 24.234667-19.114667 43.889778-42.666667 43.889778s-42.666667-19.626667-42.666666-43.889778V119.665778c-0.142222-11.747556 4.266667-23.04 12.288-31.402667a42.097778 42.097778 0 0 1 30.378666-13.084444zM526.222222 0a42.382222 42.382222 0 0 1 30.151111 12.885333l284.444445 292.551111c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.840889-12.600889 31.004444a42.097778 42.097778 0 0 1-60.302222 0l-284.444445-292.551111a44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.812444 12.600889-31.004445A42.382222 42.382222 0 0 1 526.222222 0z m0 0a42.382222 42.382222 0 0 1 30.151111 12.885333c8.049778 8.192 12.600889 19.342222 12.600889 31.004445 0 11.662222-4.551111 22.812444-12.600889 31.004444l-284.444444 292.579556a42.097778 42.097778 0 0 1-60.302222 0 44.231111 44.231111 0 0 1-12.600889-31.004445c0-11.662222 4.551111-22.840889 12.600889-31.004444l284.444444-292.579556A42.382222 42.382222 0 0 1 526.222222 0z" fill="#000000" p-id="6473"></path></svg>
-                        </span>
-                        {sharedUploading ? '上传中...' : '上传文件'}
-                        <input type="file" className="file-input" accept=".txt,.md,.markdown,.pdf,.docx" onChange={handleSharedUpload} disabled={sharedUploading} />
-                      </label>
-                      {selectedSharedKB.owner_id === user?.id ? (
-                        <button className="action-btn" style={{ color: '#ff4d4f' }} onClick={handleSharedDeleteKB}>删除知识库</button>
-                      ) : (
-                        <button className="action-btn" style={{ color: '#ff7875' }} onClick={handleSharedQuitKB}>退出知识库</button>
-                      )}
+                  )}
+                  <div className="shared-kb-meta">
+                    <div className="shared-kb-name">
+                      {selectedSharedKB.name}
+                      <span className="shared-kb-badge">{selectedSharedKB.is_public ? '公开' : '私有'}</span>
+                      <span className="shared-kb-badge">{selectedSharedKB.category}</span>
+                    </div>
+                    <div className="shared-kb-desc">{selectedSharedKB.description || '暂无简介'}</div>
+                    <div className="shared-kb-stats">
+                      @{selectedSharedKB.owner_name} &nbsp;·&nbsp; {selectedSharedKB.member_count ?? 0} 成员 &nbsp;·&nbsp; {selectedSharedKB.file_count ?? 0} 个文件
                     </div>
                   </div>
                 </div>
 
+                {/* 格式提示 */}
+                <div className="format-hint-bar">
+                  <span className="format-hint-text">
+                    支持格式：<strong>PDF</strong> · <strong>Word</strong>（.docx）· <strong>TXT</strong> · <strong>Markdown</strong>（.md）&nbsp;· 单文件最大 20 MB
+                  </span>
+                </div>
+
                 {/* 文件列表 */}
                 <div className="folder-section">
-                  <div className="section-header">
-                    <div className="section-title-wrapper">
-                      <div className="section-title">文件列表（{sharedKBFiles.length}）</div>
-                    </div>
-                  </div>
                   <div className="folder-items">
                     {sharedKBFiles.length === 0 ? (
                       <div className="empty-folder">
-                        <div className="empty-icon">📂</div>
+                        <div className="empty-icon">
+                          <svg t="1772755763302" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3586" width="48" height="48">
+                            <path d="M896 967.111111h-768C57.315556 967.111111 0 908.885333 0 837.091556V186.88C0 115.114667 57.315556 56.888889 128 56.888889h183.466667A127.857778 127.857778 0 0 1 426.666667 130.56l26.453333 56.348444H896c70.684444 0 128 58.225778 128 130.048v520.135112C1024 908.885333 966.684444 967.111111 896 967.111111zM85.333333 437.447111v399.644445c0 23.921778 19.114667 43.320889 42.666667 43.320888h768c23.552 0 42.666667-19.399111 42.666667-43.320888v-399.644445H85.333333z m0-86.698667h853.333334v-33.792c0-23.950222-19.114667-43.349333-42.666667-43.349333H426.666667a42.609778 42.609778 0 0 1-38.4-24.718222l-37.973334-80.611556a42.609778 42.609778 0 0 0-38.826666-24.689777H128c-23.552 0-42.666667 19.399111-42.666667 43.320888v163.84z" fill="#cccccc" p-id="3587"></path>
+                          </svg>
+                        </div>
                         <div className="empty-text">暂无文件</div>
                         <div className="empty-hint">点击上方「上传文件」添加内容到知识库</div>
                       </div>
                     ) : (
                       sharedKBFiles.map(file => (
                         <div key={file.id} className="folder-item file" onClick={() => handleSharedFileClick(file)} style={{ cursor: 'pointer' }}>
-                          <span className="folder-icon file">📄</span>
+                          <span className="folder-icon file">
+                            {file.name?.endsWith('.pdf') ? '📄' : file.name?.endsWith('.docx') || file.name?.endsWith('.doc') ? '📝' : '📄'}
+                          </span>
                           <span className="folder-name">{file.name}</span>
-                          <span className="file-size" style={{ marginLeft: 'auto', flexShrink: 0 }}>{formatFileSize(file.file_size)}</span>
-                          <span style={{ fontSize: 11, color: '#bbb', marginLeft: 10, flexShrink: 0 }}>@{file.uploader_name}</span>
+                          <span className="file-size">{formatFileSize(file.file_size)}</span>
+                          <span className="shared-uploader">@{file.uploader_name}</span>
                           {(selectedSharedKB.owner_id === user?.id || file.uploader_id === user?.id) && (
-                            <button
-                              style={{ marginLeft: 8, background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: 12, flexShrink: 0, padding: '2px 6px' }}
-                              onClick={(e) => handleSharedDeleteFile(file, e)}
-                            >删除</button>
+                            <div className="item-menu">
+                              <button
+                                className="menu-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSharedFileMenuId(file.id)
+                                  setSharedFileMenuPos({ x: e.clientX, y: e.clientY })
+                                }}
+                              >⋮</button>
+                            </div>
                           )}
                         </div>
                       ))
@@ -1595,8 +1608,13 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
                 <button
                   className="download-btn"
                   onClick={handleDownloadDocument}
+                  title="下载文件"
                 >
-                  📥 下载
+                  <svg t="1777184599202" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16" style={{ verticalAlign: 'middle', marginRight: 4 }}>
+                    <path d="M46.535111 580.949333c12.344889 0 24.177778 4.892444 32.910222 13.568 8.732444 8.647111 13.653333 20.423111 13.653334 32.711111v201.159112c0 25.543111 20.821333 46.250667 46.535111 46.250666h744.732444c25.713778 0 46.535111-20.707556 46.535111-46.250666V627.2c0-16.497778 8.874667-31.772444 23.267556-40.049778 14.421333-8.248889 32.142222-8.248889 46.563555 0 14.392889 8.248889 23.267556 23.523556 23.267556 40.049778v201.187556C1024 905.016889 961.479111 967.111111 884.337778 967.111111H139.662222C62.492444 967.111111 0 905.016889 0 828.387556V627.2c0-25.543111 20.849778-46.250667 46.535111-46.250667z" fill="currentColor" />
+                    <path d="M327.111111 102.855111A46.08 46.08 0 0 1 373.276444 56.888889h277.333334A46.08 46.08 0 0 1 696.888889 102.855111v266.325333h138.666667c19.2 0 36.408889 11.776 43.235555 29.639112a45.795556 45.795556 0 0 1-12.515555 50.716444L542.634667 734.862222a46.421333 46.421333 0 0 1-61.326223 0L157.781333 449.536a45.795556 45.795556 0 0 1-12.544-50.688 46.222222 46.222222 0 0 1 43.178667-29.667556h138.666667V102.855111z m92.444445 45.966222v266.325334a46.08 46.08 0 0 1-46.250667 45.966222h-63.089778l201.756445 177.92 201.756444-177.92h-63.089778a46.08 46.08 0 0 1-46.222222-45.966222V148.821333h-184.888889z" fill="currentColor" />
+                  </svg>
+                  下载
                 </button>
                 <button className="close-btn" onClick={handleCloseDocument}>
                   ×
@@ -1615,26 +1633,22 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
                 <div className="word-preview-container">
                   <div className="document-content" dangerouslySetInnerHTML={{ __html: viewingDocument.htmlContent }}></div>
                 </div>
-              ) : viewingDocument.fileType === 'text/plain' || viewingDocument.fileType === 'text/markdown' || viewingDocument.name.endsWith('.md') ? (
-                // 文本文件预览
+              ) : viewingDocument.name.endsWith('.md') || viewingDocument.name.endsWith('.markdown') || viewingDocument.fileType === 'text/markdown' ? (
+                // Markdown 文件预览
+                <div className="document-content-container">
+                  <div className="document-content markdown-body">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {viewingDocument.content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              ) : viewingDocument.fileType === 'text/plain' || viewingDocument.name.endsWith('.txt') ? (
+                // 纯文本文件预览
                 <div className="document-content-container">
                   <div className="document-content">
-                  {viewingDocument.content.split('\n').map((line, index) => {
-                    // 处理标题
-                    if (line.startsWith('# ')) {
-                      return <h1 key={index} className="document-h1">{line.substring(2)}</h1>
-                    } else if (line.startsWith('## ')) {
-                      return <h2 key={index} className="document-h2">{line.substring(3)}</h2>
-                    } else if (line.startsWith('### ')) {
-                      return <h3 key={index} className="document-h3">{line.substring(4)}</h3>
-                    } else if (line.startsWith('- ')) {
-                      return <li key={index} className="document-list-item">{line.substring(2)}</li>
-                    } else if (line.trim() === '') {
-                      return <br key={index} />
-                    } else {
-                      return <p key={index} className="document-paragraph">{line}</p>
-                    }
-                  })}
+                    <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', margin: 0 }}>
+                      {viewingDocument.content}
+                    </pre>
                   </div>
                 </div>
               ) : viewingDocument.fileType === 'application/pdf' ? (
@@ -1716,6 +1730,27 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
             <span className="menu-icon">
               <svg t="1770619629957" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3758" width="16" height="16"><path d="M874.011741 138.270167v746.665215c0 29.35461-12.003532 57.457666-33.336825 78.22207A115.455776 115.455776 0 0 1 760.234184 995.555611h-511.999004c-30.179497 0-59.135885-11.6622-80.469177-32.398159a109.084232 109.084232 0 0 1-33.30838-78.22207V138.270167h739.554118z m-85.333168 82.972283h-568.887783V884.906937c0 7.338652 2.986661 14.364417 8.305762 19.56974 5.347545 5.176879 12.57242 8.078207 20.138628 8.078206h511.999004c7.537763 0 14.791082-2.901328 20.110183-8.078206a27.278169 27.278169 0 0 0 8.334206-19.56974V221.24245z m-383.999253 580.720648c-23.580399 0-42.666584-18.545742-42.666584-41.471919V428.658935c0-22.897733 19.086185-41.471919 42.666584-41.471919 23.551954 0 42.666584 18.574186 42.666583 41.471919v331.860688c0 22.926178-19.114629 41.471919-42.666583 41.47192z m199.110724 0c-23.580399 0-42.666584-18.545742-42.666584-41.471919V428.658935c0-22.897733 19.086185-41.471919 42.666584-41.471919 23.551954 0 42.666584 18.574186 42.666583 41.471919v331.860688c0 22.926178-19.114629 41.471919-42.666583 41.47192z m355.554864-580.720648h-910.220452c-23.580399 0-42.666584-18.574186-42.666584-41.500364 0-22.897733 19.086185-41.471919 42.666584-41.471919h910.220452c23.551954 0 42.666584 18.574186 42.666584 41.471919 0 22.926178-19.114629 41.500364-42.666584 41.500364z m-331.377133-138.268176l7.111097 55.295893h-261.68838l7.111097-55.295893h247.466186zM652.998837 0.001991h-297.52831c-28.842611-0.227555-53.304785 20.565293-56.888779 48.383906l-21.902179 172.856553h455.110226l-22.186624-172.856553c-3.612437-27.818613-28.074612-48.611461-56.888778-48.355462h0.284444z" fill="#000000" p-id="3759"></path></svg>
             </span>
+            <span className="menu-text">删除</span>
+          </div>
+        </div>
+      )}
+
+      {/* 共享文件三点菜单 */}
+      {sharedFileMenuId && (
+        <div
+          className="context-menu"
+          style={{ position: 'fixed', left: sharedFileMenuPos.x, top: sharedFileMenuPos.y, zIndex: 1001 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className="context-menu-item delete"
+            onClick={() => {
+              const file = sharedKBFiles.find(f => f.id === sharedFileMenuId)
+              if (file) handleSharedDeleteFile(file, { stopPropagation: () => {} })
+              setSharedFileMenuId(null)
+            }}
+          >
+            <span className="menu-icon">🗑</span>
             <span className="menu-text">删除</span>
           </div>
         </div>
@@ -1876,128 +1911,78 @@ Corvus Note 是一款基于AI的智能笔记与对话系统，专为提高个人
       {/* 分块设置模态框 */}
       {showChunkSettings && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '600px' }}>
+          <div className="modal-content chunk-modal">
             <div className="modal-header">
-              <h2>文件分块设置</h2>
-              <button className="close-btn" onClick={() => setShowChunkSettings(false)}>
-                ×
-              </button>
+              <div>
+                <h2>上传文件 · 分块配置</h2>
+                <p className="chunk-modal-subtitle">选择合适的分块策略，影响知识库检索的精度</p>
+              </div>
+              <button className="close-btn" onClick={() => setShowChunkSettings(false)}>×</button>
             </div>
             <div className="modal-body">
-              <div className="form-group">
-                <label>分块策略</label>
-                <div className="strategy-mode">
-                  <label className="radio-option">
-                    <input
-                      type="radio"
-                      name="strategyMode"
-                      value="auto"
-                      checked={strategyMode === 'auto'}
-                      onChange={() => setStrategyMode('auto')}
-                    />
-                    <span>自动分块（推荐）</span>
-                  </label>
-                  <label className="radio-option">
-                    <input
-                      type="radio"
-                      name="strategyMode"
-                      value="manual"
-                      checked={strategyMode === 'manual'}
-                      onChange={() => setStrategyMode('manual')}
-                    />
-                    <span>手动调整</span>
-                  </label>
+
+              {/* 策略选择卡片 */}
+              <div className="strategy-cards">
+                <div
+                  className={`strategy-card ${strategyMode === 'auto' ? 'active' : ''}`}
+                  onClick={() => setStrategyMode('auto')}
+                >
+                  <div className="strategy-card-icon">⚡</div>
+                  <div className="strategy-card-title">自动分块</div>
+                  <div className="strategy-card-desc">根据文件大小自动选择最优参数，推荐普通用户使用</div>
+                  {strategyMode === 'auto' && <div className="strategy-card-check">✓</div>}
+                </div>
+                <div
+                  className={`strategy-card ${strategyMode === 'manual' ? 'active' : ''}`}
+                  onClick={() => setStrategyMode('manual')}
+                >
+                  <div className="strategy-card-icon">🔧</div>
+                  <div className="strategy-card-title">手动配置</div>
+                  <div className="strategy-card-desc">自定义分块参数，适合对检索效果有特定需求的用户</div>
+                  {strategyMode === 'manual' && <div className="strategy-card-check">✓</div>}
                 </div>
               </div>
 
+              {/* 手动参数 */}
               {strategyMode === 'manual' && (
-                <div className="chunk-settings">
-                  <div className="form-group">
-                    <label htmlFor="chunkSize">分块大小（{chunkSize}）</label>
-                    <input
-                      type="range"
-                      id="chunkSize"
-                      min="100"
-                      max="2000"
-                      step="50"
-                      value={chunkSize}
-                      onChange={(e) => setChunkSize(Number(e.target.value))}
-                    />
-                    <div className="range-labels">
-                      <span>100</span>
-                      <span>2000</span>
+                <div className="chunk-params">
+                  {[
+                    { id: 'chunkSize', label: '分块大小', hint: '每个文本块包含的最大字符数', min: 100, max: 2000, step: 50, value: chunkSize, set: setChunkSize, unit: '字' },
+                    { id: 'chunkOverlap', label: '块间重叠', hint: '相邻块共享的字符数，避免语义截断', min: 0, max: 200, step: 10, value: chunkOverlap, set: setChunkOverlap, unit: '字' },
+                    { id: 'topK', label: '检索数量（Top-K）', hint: '每次问答最终使用的相关片段数', min: 1, max: 10, step: 1, value: topK, set: setTopK, unit: '条' },
+                    { id: 'scoreThreshold', label: '相似度阈值', hint: '低于此值的候选片段将被过滤', min: 0, max: 2, step: 0.05, value: scoreThreshold, set: setScoreThreshold, unit: '', fmt: v => v.toFixed(2) },
+                  ].map(({ id, label, hint, min, max, step, value, set, unit, fmt }) => (
+                    <div key={id} className="chunk-param-row">
+                      <div className="chunk-param-header">
+                        <span className="chunk-param-label">{label}</span>
+                        <span className="chunk-param-value">{fmt ? fmt(value) : value}{unit}</span>
+                      </div>
+                      <input
+                        type="range" min={min} max={max} step={step} value={value}
+                        onChange={(e) => set(Number(e.target.value))}
+                        className="chunk-slider"
+                      />
+                      <div className="chunk-param-hint">{hint}</div>
                     </div>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="chunkOverlap">重叠大小（{chunkOverlap}）</label>
-                    <input
-                      type="range"
-                      id="chunkOverlap"
-                      min="0"
-                      max="200"
-                      step="10"
-                      value={chunkOverlap}
-                      onChange={(e) => setChunkOverlap(Number(e.target.value))}
-                    />
-                    <div className="range-labels">
-                      <span>0</span>
-                      <span>200</span>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="topK">返回结果数（{topK}）</label>
-                    <input
-                      type="range"
-                      id="topK"
-                      min="1"
-                      max="10"
-                      step="1"
-                      value={topK}
-                      onChange={(e) => setTopK(Number(e.target.value))}
-                    />
-                    <div className="range-labels">
-                      <span>1</span>
-                      <span>10</span>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="scoreThreshold">相似度阈值（{scoreThreshold.toFixed(2)}）</label>
-                    <input
-                      type="range"
-                      id="scoreThreshold"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value={scoreThreshold}
-                      onChange={(e) => setScoreThreshold(Number(e.target.value))}
-                    />
-                    <div className="range-labels">
-                      <span>0</span>
-                      <span>1.0</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
 
-              <div className="file-list">
-                <h3>待上传文件</h3>
-                <ul>
-                  {selectedFiles.map((file, index) => (
-                    <li key={index}>
-                      <span className="file-name">{file.name}</span>
-                      <span className="file-size">{formatFileSize(file.size)}</span>
-                    </li>
-                  ))}
-                </ul>
+              {/* 待上传文件列表 */}
+              <div className="upload-file-list">
+                <div className="upload-file-list-title">待上传文件（{selectedFiles.length}）</div>
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="upload-file-item">
+                    <span className="upload-file-icon">📄</span>
+                    <span className="upload-file-name">{file.name}</span>
+                    <span className="upload-file-size">{formatFileSize(file.size)}</span>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="cancel-btn" onClick={() => setShowChunkSettings(false)}>
-                取消
-              </button>
-              <button type="button" className="submit-btn" onClick={handleChunkSettingsSubmit}>
-                上传
-              </button>
+              <button type="button" className="cancel-btn" onClick={() => setShowChunkSettings(false)}>取消</button>
+              <button type="button" className="submit-btn" onClick={handleChunkSettingsSubmit}>开始上传</button>
             </div>
           </div>
         </div>

@@ -1181,10 +1181,10 @@ function ChatPage({ messages, setMessages, onNewChat, user, onLogout, onShowSett
               <div className="user-info">
                 <img 
                   src={user.avatar} 
-                  alt={user.username} 
+                  alt={user.nickname || user.username}
                   className="user-avatar"
                 />
-                <span className="username">{user.username}</span>
+                <span className="username">{user.nickname || user.username}</span>
               </div>
             </div>
           </div>
@@ -1202,15 +1202,18 @@ function ChatPage({ messages, setMessages, onNewChat, user, onLogout, onShowSett
                       <div className="assistant-content-header">
                         <div className="message-title"></div>
                         <div className="response-actions">
-                          {/* 生成思维导图按钮 */}
-                          <button 
-                            className="response-action-btn"
+                          {/* 生成思维导图按钮（游客禁用） */}
+                          <button
+                            className={`response-action-btn${user?.isGuest ? ' btn-locked' : ''}`}
                             onClick={() => {
-                              // 生成思维导图的逻辑
-                              handleGenerateMindMap(message.content, message, index);
+                              if (user?.isGuest) {
+                                alert('注册后即可生成思维导图并导出')
+                                return
+                              }
+                              handleGenerateMindMap(message.content, message, index)
                             }}
-                            title="生成思维导图"
-                            disabled={generatingMindMapIndex === index || message.content === ''}
+                            title={user?.isGuest ? '注册后解锁：生成思维导图' : '生成思维导图'}
+                            disabled={!user?.isGuest && (generatingMindMapIndex === index || message.content === '')}
                           >
                             {generatingMindMapIndex === index ? (
                               <span className="loading-icon-container">
@@ -1220,26 +1223,26 @@ function ChatPage({ messages, setMessages, onNewChat, user, onLogout, onShowSett
                               <svg t="1770452015092" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6274" width="24" height="24"><path d="M620.8 364.8h352c25.6 0 44.8-19.2 44.8-44.8V64c0-25.6-19.2-44.8-44.8-44.8H620.8C595.2 19.2 576 38.4 576 64v89.6H288c-25.6 0-44.8 19.2-44.8 44.8V320L25.6 473.6c-12.8 12.8-19.2 25.6-19.2 38.4s6.4 25.6 19.2 38.4L243.2 704v128c0 25.6 19.2 44.8 44.8 44.8H576V960c0 25.6 19.2 44.8 44.8 44.8h352c25.6 0 44.8-19.2 44.8-44.8v-256c0-25.6-19.2-44.8-44.8-44.8H620.8c-25.6 0-44.8 19.2-44.8 44.8v83.2H332.8v-76.8l224-166.4c12.8-6.4 19.2-19.2 19.2-32s-6.4-25.6-19.2-38.4L332.8 313.6v-64H576V320c0 25.6 19.2 44.8 44.8 44.8z m44.8-256h262.4v166.4h-262.4V108.8z m0 640h262.4v166.4h-262.4v-166.4zM288 627.2L128 512l160-115.2L454.4 512 288 627.2z" fill="#2c2c2c" p-id="6275"></path></svg>
                             )}
                           </button>
-                          {/* 记笔记按钮 */}
-                          <button 
-                            className="response-action-btn"
+                          {/* 记笔记按钮（游客禁用） */}
+                          <button
+                            className={`response-action-btn${user?.isGuest ? ' btn-locked' : ''}`}
                             onClick={() => {
-                              // 创建新笔记，将AI回答作为内容
-                              const noteTitle = message.content.substring(0, 50).trim() || '新笔记';
-                              // 调用父组件传递的创建笔记函数
+                              if (user?.isGuest) {
+                                alert('注册后即可将 AI 回答保存为笔记')
+                                return
+                              }
+                              const noteTitle = message.content.substring(0, 50).trim() || '新笔记'
                               if (onCreateNewNote) {
-                                onCreateNewNote();
-                                // 使用onEditNote更新笔记内容
+                                onCreateNewNote()
                                 if (notes.length > 0 && onEditNote) {
-                                  const newNoteId = notes[0].id;
-                                  onEditNote(newNoteId, { title: noteTitle, content: message.content });
-                                  // 显示成功提示
-                                  showToast('笔记生成成功！');
+                                  const newNoteId = notes[0].id
+                                  onEditNote(newNoteId, { title: noteTitle, content: message.content })
+                                  showToast('笔记生成成功！')
                                 }
                               }
                             }}
-                            title="将回答生成笔记"
-                            disabled={message.content === ''}
+                            title={user?.isGuest ? '注册后解锁：保存为笔记' : '将回答生成笔记'}
+                            disabled={!user?.isGuest && message.content === ''}
                           >
                             <svg t="1770274140523" className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3142" width="24" height="24"><path d="M821.333333 1024H201.955556A202.296889 202.296889 0 0 1 0 821.902222V202.097778A202.296889 202.296889 0 0 1 201.955556 0h309.674666a40.391111 40.391111 0 0 1 0 80.839111H201.955556a121.486222 121.486222 0 0 0-121.173334 121.258667v619.804444a121.486222 121.486222 0 0 0 121.173334 121.258667h619.377777a121.486222 121.486222 0 0 0 121.173334-121.258667V512a40.391111 40.391111 0 1 1 80.782222 0v309.902222a202.296889 202.296889 0 0 1-201.955556 202.097778z m33.905778-932.124444l37.973333 38.286222 38.257778 38.001778-185.827555 185.912888-222.151111 222.065778-83.740445 7.793778 7.793778-83.797333 221.895111-222.321778 185.799111-185.912889z m0-91.875556c-14.336 0-28.103111 5.688889-38.229333 15.900444l-204.657778 204.8-235.349333 237.397334a26.965333 26.965333 0 0 0-7.822223 16.440889l-15.075555 167.879111a26.965333 26.965333 0 0 0 26.936889 29.383111h2.417778l167.765333-15.075556a26.908444 26.908444 0 0 0 16.440889-7.822222l235.889778-236.088889 204.657777-204.8a53.902222 53.902222 0 0 0 0-76.231111l-57.912889-58.766222L893.212444 15.928889A53.845333 53.845333 0 0 0 855.239111 0z" fill="#2c2c2c" p-id="3143"></path></svg>
                           </button>

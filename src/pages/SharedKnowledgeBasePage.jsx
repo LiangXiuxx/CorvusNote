@@ -3,6 +3,8 @@
  * 管理（上传/删除/创建）全部在 KnowledgeBasePage 完成
  */
 import React, { useState, useEffect, useCallback } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import '../styles/SharedKnowledgeBasePage.css'
 import {
   fetchPublicKBs, fetchSharedKBDetail,
@@ -161,16 +163,9 @@ function SharedKnowledgeBasePage({ user, onBackToHome, onNavigateToPersonalKnowl
             <div className="logo" onClick={onBackToHome} style={{ cursor:'pointer' }}>
               <div className="raven-icon"></div>
             </div>
-            <h1 className="page-title">发现广场</h1>
+            <h1 className="page-title">发现</h1>
           </div>
           <div className="page-actions">
-            <button
-              className="submit-btn"
-              style={{ marginRight: 12, fontSize: 13 }}
-              onClick={onNavigateToPersonalKnowledge}
-            >
-              ← 返回知识库
-            </button>
             <div className="user-info">
               <img src={user?.avatar} alt={user?.username} className="user-avatar" />
               <span className="username">{user?.username}</span>
@@ -343,17 +338,20 @@ function SharedKnowledgeBasePage({ user, onBackToHome, onNavigateToPersonalKnowl
                   <div className="loading-spinner" />
                   <p className="loading-text">加载中...</p>
                 </div>
+              ) : viewingDoc.content && (viewingDoc.name?.endsWith('.md') || viewingDoc.name?.endsWith('.markdown') || viewingDoc.file_type === 'text/markdown') ? (
+                <div className="document-content-container">
+                  <div className="document-content markdown-body">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {viewingDoc.content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
               ) : viewingDoc.content ? (
                 <div className="document-content-container">
                   <div className="document-content">
-                    {viewingDoc.content.split('\n').map((line, i) => {
-                      if (line.startsWith('### ')) return <h3 key={i} className="document-h3">{line.slice(4)}</h3>
-                      if (line.startsWith('## '))  return <h2 key={i} className="document-h2">{line.slice(3)}</h2>
-                      if (line.startsWith('# '))   return <h1 key={i} className="document-h1">{line.slice(2)}</h1>
-                      if (line.startsWith('- '))   return <li key={i} className="document-list-item">{line.slice(2)}</li>
-                      if (line.trim() === '')      return <br key={i} />
-                      return <p key={i} className="document-paragraph">{line}</p>
-                    })}
+                    <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', margin: 0 }}>
+                      {viewingDoc.content}
+                    </pre>
                   </div>
                 </div>
               ) : (

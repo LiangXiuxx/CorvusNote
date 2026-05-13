@@ -85,7 +85,19 @@ const AppContent = () => {
     { id: 'qwen3.5-plus', name: 'Qwen3.5 Plus' },
     { id: 'glm-5', name: 'GLM-5' },
     { id: 'MiniMax-M2.5', name: 'MiniMax M2.5' },
+    { id: 'mimo-v2.5-pro', name: 'MiMo V2.5 Pro' },
+    { id: 'mimo-v2.5', name: 'MiMo V2.5' },
   ]
+  // 游客只能使用基础模型，注册后解锁全部模型
+  const visibleModels = user?.isGuest ? [{ id: 'qwen3.5-flash', name: 'Qwen3.5 Flash（试用）' }] : models
+
+  // localStorage 中的模型 ID 若不在当前列表里（如旧版大写 ID），重置为默认
+  useEffect(() => {
+    if (!models.some(m => m.id === selectedModel)) {
+      setSelectedModel('qwen3.5-flash')
+      localStorage.setItem('corvusNoteSelectedModel', 'qwen3.5-flash')
+    }
+  }, [])
 
   // 登录后从后端加载对话列表、消息、笔记
   useEffect(() => {
@@ -472,16 +484,15 @@ const AppContent = () => {
 
   const handleLogin = (userData, action) => {
     if (action === 'register') {
-      setShowRegister(true)
+      setShowRegister(true)   // 跳转注册页，不执行后面的 false
     } else if (action === 'guest') {
-      // 游客登录：先设置用户，后关闭登录页面
       loginAsGuest()
       setIsChatting(true)
+      setShowRegister(false)
     } else {
       setIsChatting(true)
+      setShowRegister(false)
     }
-    // 无论哪种登录，都关闭登录页面
-    setShowRegister(false)
   }
 
   const handleRegister = (userData) => {
@@ -542,7 +553,7 @@ const AppContent = () => {
             setIsNotesPage(false);
             setIsAdminPage(false);
           }}
-          models={models}
+          models={visibleModels}
           selectedModel={selectedModel}
           onModelChange={handleModelChange}
           isGenerating={isGenerating}
@@ -599,7 +610,7 @@ const AppContent = () => {
           onGoToNotes={() => setIsNotesPage(true)}
           onGoToAdminPage={() => setIsAdminPage(true)}
           onCreateNewNote={createNewNote}
-          models={models}
+          models={visibleModels}
           selectedModel={selectedModel}
           onModelChange={handleModelChange}
         />
